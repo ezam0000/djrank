@@ -1,0 +1,346 @@
+:root {
+  color-scheme: dark;
+  --background-base: #0b0f14;
+  --panel: #12161f;
+  --panel-alt: #181d27;
+  --text-primary: #f5f7fa;
+  --text-secondary: #b7c4d6;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--background-base);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+}
+
+.ranking-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem clamp(1rem, 4vw, 2.5rem);
+  background: #12161f;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid var(--border-subtle);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.ranking-header h1 {
+  margin: 0;
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-size: 1.75rem;
+}
+
+.back-link,
+.ghost-button {
+  background: none;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  border-radius: 999px;
+  padding: 0.4rem 1.25rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) 1fr;
+  gap: 2rem;
+  padding: 2rem clamp(1rem, 4vw, 2.5rem);
+}
+
+.queue {
+  background: var(--panel);
+  border-radius: 18px;
+  border: 1px solid var(--border-subtle);
+  padding: 1.5rem 1.25rem;
+  min-height: 400px;
+}
+
+.queue-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.queue-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.queue-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #181d27;
+  border-radius: 12px;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: grab;
+}
+
+.queue-card:active {
+  cursor: grabbing;
+}
+
+.avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.queue-card .meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.board {
+  display: grid;
+  gap: 1rem;
+}
+
+.tier-row {
+  display: grid;
+  grid-template-columns: 112px 1fr;
+  min-height: 120px;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.tier-label {
+  background: var(--tier-color);
+  color: #0b0f14;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 1rem;
+}
+
+.tier-label .tier-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.tier-drop {
+  background: linear-gradient(90deg, rgba(18, 22, 31, 0.92), rgba(24, 29, 39, 0.92));
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.35);
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(140px, 180px);
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.tier-drop:empty::before {
+  content: 'Drag DJs here';
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.95rem;
+}
+
+.tier-drop.drag-target {
+  outline: 2px dashed var(--tier-color);
+  outline-offset: -8px;
+}
+
+.tier-card {
+  background: #1e2430;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 0.75rem;
+  display: grid;
+  place-items: center;
+  gap: 0.5rem;
+  min-width: 140px;
+  cursor: grab;
+}
+
+.tier-card:active {
+  cursor: grabbing;
+}
+
+.tier-card .name {
+  font-weight: 600;
+  text-align: center;
+}
+
+.tier-card .status-icons {
+  display: flex;
+  gap: 0.35rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  border: 0;
+  background: #202635;
+  color: var(--text-secondary);
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+}
+
+.modal.open {
+  display: block;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: grid;
+  place-items: center;
+}
+
+.modal-dialog {
+  background: #141821;
+  border-radius: 18px;
+  width: min(520px, 92vw);
+  max-height: 90vh;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.modal-content {
+  padding: 1.5rem;
+  display: grid;
+  gap: 1.25rem;
+  overflow-y: auto;
+}
+
+.field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.field span {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.field input,
+.field textarea {
+  background: rgba(18, 24, 32, 0.8);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.75rem;
+  color: inherit;
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+.field-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.modal-actions .actions-right {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.toast-container {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.toast {
+  background: rgba(20, 24, 33, 0.95);
+  border-radius: 12px;
+  padding: 0.75rem 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.toast-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .queue {
+    order: -1;
+  }
+
+  .tier-row {
+    grid-template-columns: 88px 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .ranking-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .tier-drop {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    overflow: visible;
+  }
+
+  .tier-card {
+    min-width: 0;
+  }
+
+  .modal-dialog {
+    border-radius: 24px 24px 0 0;
+    max-height: 92vh;
+  }
+
+  .modal-backdrop {
+    align-items: flex-end;
+  }
+}
+

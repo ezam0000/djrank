@@ -1,0 +1,159 @@
+[
+  {
+    "id": "tiesto",
+    "name": "Tiësto",
+    "residencies": ["Las Vegas"],
+    "genres": ["EDM", "Progressive House"],
+    "image": "https://images.unsplash.com/photo-1523726491678-bf852e717f6a?auto=format&fit=crop&w=600&q=80",
+    "links": {
+      "spotify": "https://open.spotify.com/artist/2o5jDhtHVPhrJdv3cEQ99Z",
+      "appleMusic": "https://music.apple.com/us/artist/ti%C3%ABsto/4091215",
+      "soundcloud": "https://soundcloud.com/tiesto"
+    }
+  },
+  {
+    "id": "zedd",
+    "name": "Zedd",
+    "residencies": ["Las Vegas"],
+    "genres": ["EDM", "Electro House"],
+    "image": "https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=600&q=80",
+    "links": {
+      "spotify": "https://open.spotify.com/artist/2qxJFvFYMEDqd7ui6kSAcq",
+      "appleMusic": "https://music.apple.com/us/artist/zedd/444435946",
+      "soundcloud": "https://soundcloud.com/zedd"
+    }
+  },
+  {
+    "id": "diplo",
+    "name": "Diplo",
+    "residencies": ["Las Vegas", "Los Angeles"],
+    "genres": ["EDM", "Dancehall"],
+    "image": "https://images.unsplash.com/photo-1464375117522-1311dd7b5266?auto=format&fit=crop&w=600&q=80",
+    "links": {
+      "spotify": "https://open.spotify.com/artist/6fomlK1KRQTRduL6s3bS67",
+      "appleMusic": "https://music.apple.com/us/artist/diplo/14623864",
+      "soundcloud": "https://soundcloud.com/diplo"
+    }
+  },
+  {
+    "id": "alesso",
+    "name": "Alesso",
+    "residencies": ["Las Vegas"],
+    "genres": ["Progressive House", "EDM"],
+    "image": "https://images.unsplash.com/photo-1485579149621-3123dd979885?auto=format&fit=crop&w=600&q=80",
+    "links": {
+      "spotify": "https://open.spotify.com/artist/4AVFqumd2ogHFlRbKIjp1t",
+      "appleMusic": "https://music.apple.com/us/artist/alesso/402264189",
+      "soundcloud": "https://soundcloud.com/alesso"
+    }
+  },
+  {
+    "id": "the_chainsmokers",
+    "name": "The Chainsmokers",
+    "residencies": ["Las Vegas", "New York"],
+    "genres": ["EDM", "Pop"],
+    "image": "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=600&q=80",
+    "links": {
+      "spotify": "https://open.spotify.com/artist/69GGBxA162lTqCwzJG5jLp",
+      "appleMusic": "https://music.apple.com/us/artist/the-chainsmokers/555759488",
+      "soundcloud": "https://soundcloud.com/thechainsmokers"
+    }
+  },
+  {
+    "id": "peggy_gou",
+    "name": "Peggy Gou",
+    "residencies": ["New York", "Los Angeles"],
+    "genres": ["House", "Techno"],
+    "image": "https://images.unsplash.com/photo-1528442920053-23d03b2591be?auto=format&fit=crop&w=600&q=80",
+    "links": {
+      "spotify": "https://open.spotify.com/artist/1HUiX8K61g7PEZMW3jswLM",
+      "appleMusic": "https://music.apple.com/us/artist/peggy-gou/1054160792",
+      "soundcloud": "https://soundcloud.com/peggygou"
+    }
+  },
+  {
+    "id": "black_coffee",
+    "name": "Black Coffee",
+    "residencies": ["Los Angeles", "New York"],
+    "genres": ["Deep House", "Afro House"],
+    "image": "https://images.unsplash.com/photo-1497039373885-32aee1e1e4c0?auto=format&fit=crop&w=600&q=80",
+    "links": {
+      "spotify": "https://open.spotify.com/artist/5JhQFHPwvDl9ftoQDwDM2c",
+      "appleMusic": "https://music.apple.com/us/artist/black-coffee/122873383",
+      "soundcloud": "https://soundcloud.com/realblackcoffee"
+    }
+  },
+  {
+    "id": "honeyluv",
+    "name": "HoneyLuv",
+    "residencies": ["Los Angeles"],
+    "genres": ["Tech House", "House"],
+    "image": "https://images.unsplash.com/photo-1512427691650-1e0c56d66204?auto=format&fit=crop&w=600&q=80",
+    "links": {
+      "spotify": "https://open.spotify.com/artist/6smPB7Leay7YgOWXb9iQlV",
+      "appleMusic": "https://music.apple.com/us/artist/honeyluv/1575616925",
+      "soundcloud": "https://soundcloud.com/honeyluv"
+    }
+  },
+  {
+    "id": "mk",
+    "name": "MK",
+    "residencies": ["Las Vegas", "Los Angeles"],
+    "genres": ["House", "Deep House"],
+    "image": "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=80",
+    "links": {
+      "spotify": "https://open.spotify.com/artist/0SwO7SWeDHJijQ3XNS7xEE",
+      "appleMusic": "https://music.apple.com/us/artist/mk/60431",
+      "soundcloud": "https://soundcloud.com/marckinchen"
+    }
+  },
+  {
+    "id": "fisher",
+    "name": "FISHER",
+    "residencies": ["Las Vegas", "Los Angeles"],
+    "genres": ["Tech House"],
+    "image": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=600&q=80",
+    "links": {
+      "spotify": "https://open.spotify.com/artist/36m3FF0vr07TJM3ZIqC57F",
+      "appleMusic": "https://music.apple.com/us/artist/fisher/518183046",
+      "soundcloud": "https://soundcloud.com/fisheraustralia"
+    }
+  },
+  {
+    "id": "kaskade",
+    "name": "Kaskade",
+    "residencies": ["Las Vegas"],
+    "genres": ["Progressive House", "EDM"],
+    "image": "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=600&q=80",
+    "links": {
+      "spotify": "https://open.spotify.com/artist/5ChF3i92IPZpFOqvIvP3bl",
+      "appleMusic": "https://music.apple.com/us/artist/kaskade/4720617",
+      "soundcloud": "https://soundcloud.com/kaskade"
+    }
+  },
+  {
+    "id": "nina_kraviz",
+    "name": "Nina Kraviz",
+    "residencies": ["Las Vegas", "New York"],
+    "genres": ["Techno"],
+    "image": "https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=600&q=80",
+    "links": {
+      "spotify": "https://open.spotify.com/artist/5X1HxFQYKfkGvQXgjVzQiC",
+      "appleMusic": "https://music.apple.com/us/artist/nina-kraviz/334736777",
+      "soundcloud": "https://soundcloud.com/nina-kraviz"
+    }
+  },
+  {
+    "id": "martin_garrix",
+    "name": "Martin Garrix",
+    "residencies": ["Las Vegas", "New York"],
+    "genres": ["EDM", "Progressive House"],
+    "image": "https://images.unsplash.com/photo-1521337580396-0259d88e59ab?auto=format&fit=crop&w=600&q=80",
+    "links": {
+      "spotify": "https://open.spotify.com/artist/60d24wfXkVzDSfLS6hyCjZ",
+      "appleMusic": "https://music.apple.com/us/artist/martin-garrix/527210844",
+      "soundcloud": "https://soundcloud.com/martingarrix"
+    }
+  }
+]
+

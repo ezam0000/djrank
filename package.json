@@ -1,0 +1,19 @@
+{
+  "name": "djrank",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "keywords": [
+    "tier",
+    "ranking",
+    "drag-and-drop"
+  ],
+  "author": "",
+  "license": "MIT",
+  "description": "Static DJ ranking interface for tier placement",
+  "devDependencies": {
+    "vercel": "^33.0.0"
+  }
+}

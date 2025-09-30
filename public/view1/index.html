@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DJRank – Select Your Favorite DJs</title>
+    <link rel="stylesheet" href="../shared.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="top-header">
+      <div class="header-brand">DJRank</div>
+      <div class="header-content">
+        <h1>Select Your Favorite DJs</h1>
+        <p>Browse and add DJs to build your ranking list.</p>
+      </div>
+      <button class="icon-button" aria-label="How ranking works">
+        <span aria-hidden="true">?</span>
+      </button>
+    </header>
+
+    <main>
+      <section class="search-section">
+        <div class="search-input">
+          <label for="dj-search" class="sr-only">Search DJs</label>
+          <input id="dj-search" type="search" placeholder="Search DJs by name or genre" />
+          <button type="button" class="voice-button" aria-label="Voice search (coming soon)">
+            <span aria-hidden="true">🎙️</span>
+          </button>
+        </div>
+        <div class="filter-chips" role="group" aria-label="Filter DJs">
+          <button type="button" class="chip" data-filter="Las Vegas">Las Vegas</button>
+          <button type="button" class="chip" data-filter="Los Angeles">Los Angeles</button>
+          <button type="button" class="chip" data-filter="New York">New York</button>
+          <button type="button" class="chip" data-filter="House">House</button>
+          <button type="button" class="chip" data-filter="Techno">Techno</button>
+          <button type="button" class="chip" data-filter="EDM">EDM</button>
+        </div>
+      </section>
+
+      <section class="catalog" aria-live="polite"></section>
+    </main>
+
+    <footer class="bottom-bar">
+      <span class="selected-count">Selected: 0</span>
+      <button class="primary" disabled>Start Ranking</button>
+    </footer>
+
+    <script type="module" src="../shared.js"></script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
+
