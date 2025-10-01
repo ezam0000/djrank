@@ -2,6 +2,16 @@
 // Uses Vercel Postgres via API endpoints
 
 const DB = {
+  // Get headers with admin token if available
+  getHeaders() {
+    const headers = { "Content-Type": "application/json" };
+    const token = sessionStorage.getItem("adminToken");
+    if (token) {
+      headers["X-Admin-Token"] = token;
+    }
+    return headers;
+  },
+
   // Get all DJs
   async getDJs() {
     try {
@@ -25,7 +35,7 @@ const DB = {
 
       const response = await fetch("/api/djs", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: this.getHeaders(),
         body: JSON.stringify(newDJ),
       });
 
@@ -42,7 +52,7 @@ const DB = {
     try {
       const response = await fetch(`/api/djs?id=${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: this.getHeaders(),
         body: JSON.stringify(updates),
       });
 
@@ -59,6 +69,7 @@ const DB = {
     try {
       const response = await fetch(`/api/djs?id=${id}`, {
         method: "DELETE",
+        headers: this.getHeaders(),
       });
 
       if (!response.ok) throw new Error("Failed to delete DJ");

@@ -6,7 +6,9 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3003;
 
-app.use(express.json());
+// Increase body size limit for base64 images/videos
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(express.static("public"));
 
 // Serve config with environment variables

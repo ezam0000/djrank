@@ -1,24 +1,39 @@
 // API endpoint for DJ operations
 const { sql } = require("@vercel/postgres");
+const { requireAdmin } = require("./auth");
 
 module.exports = async (req, res) => {
   // Set CORS headers
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Admin-Token");
 
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
   try {
-    // GET - Fetch all DJs
+    // GET - Fetch all DJs (public access)
     if (req.method === "GET") {
       const result = await sql`SELECT * FROM djs ORDER BY created_at DESC`;
       return res.status(200).json(result.rows);
     }
 
-    // POST - Add new DJ
+    // Protect mutations - require admin authentication
+    if (
+      req.method === "POST" ||
+      req.method === "PUT" ||
+      req.method === "DELETE"
+    ) {
+      const authCheck = requireAdmin(req, res);
+      if (!authCheck.authorized) {
+        return res
+          .status(authCheck.error.status)
+          .json({ error: authCheck.error.message });
+      }
+    }
+
+    // POST - Add new DJ (admin only)
     if (req.method === "POST") {
       const {
         id,
@@ -63,9 +78,12 @@ module.exports = async (req, res) => {
       Object.keys(updates).forEach((key) => {
         if (key !== "id") {
           fields.push(`${key} = $${paramCount}`);
-          // Handle JSONB fields
+          // Handle JSONB and array fields
           if (key === "criteria") {
             values.push(JSON.stringify(updates[key]));
+          } else if (key === "photos" || key === "videos") {
+            // TEXT[] arrays - pass as-is (Postgres will handle)
+            values.push(updates[key] || []);
           } else {
             values.push(updates[key]);
           }

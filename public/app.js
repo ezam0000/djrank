@@ -6,6 +6,8 @@ class DJRankApp {
     this.currentDJ = null;
     this.deleteMode = false;
     this.longPressTimer = null;
+    this.isAdmin = false;
+    this.uploadsInProgress = 0;
     this.init();
   }
 
@@ -14,6 +16,9 @@ class DJRankApp {
 
     // Wait for config to load
     await configReady;
+
+    // Check if admin token exists
+    this.checkAdminStatus();
 
     // Load DJs from database or create sample data
     await this.loadDJs();
@@ -25,7 +30,69 @@ class DJRankApp {
     this.renderArtistGrid();
     this.loadTierRankings();
 
+    // Update UI based on admin status
+    this.updateUIForAdminMode();
+
     console.log("✅ App initialized");
+  }
+
+  checkAdminStatus() {
+    const token = sessionStorage.getItem("adminToken");
+    this.isAdmin = !!token;
+    if (this.isAdmin) {
+      console.log("🔓 Admin mode active");
+    } else {
+      console.log("👁️ Public view mode");
+    }
+  }
+
+  showAdminPrompt() {
+    const token = prompt("🔐 Enter admin token:");
+    if (token && token.trim()) {
+      sessionStorage.setItem("adminToken", token.trim());
+      this.isAdmin = true;
+      console.log("🔓 Admin mode activated");
+      location.reload();
+    }
+  }
+
+  logout() {
+    sessionStorage.removeItem("adminToken");
+    this.isAdmin = false;
+    console.log("🔒 Logged out");
+    location.reload();
+  }
+
+  updateUIForAdminMode() {
+    // Add/remove admin-mode class to body
+    if (this.isAdmin) {
+      document.body.classList.add("admin-mode");
+    } else {
+      document.body.classList.remove("admin-mode");
+    }
+
+    // Show/hide admin indicator
+    let indicator = document.getElementById("adminIndicator");
+    if (!indicator) {
+      indicator = document.createElement("div");
+      indicator.id = "adminIndicator";
+      indicator.className = "admin-indicator";
+      indicator.innerHTML = `
+        <span>🔓 Admin Mode</span>
+        <button onclick="window.app.logout()">Logout</button>
+      `;
+      document.body.appendChild(indicator);
+    }
+
+    indicator.style.display = this.isAdmin ? "flex" : "none";
+
+    // Make notes field read-only for public
+    const notesField = document.getElementById("djNotes");
+    if (notesField) {
+      notesField.readOnly = !this.isAdmin;
+      notesField.style.cursor = this.isAdmin ? "text" : "default";
+      notesField.style.opacity = this.isAdmin ? "1" : "0.7";
+    }
   }
 
   async loadDJs() {
@@ -37,6 +104,26 @@ class DJRankApp {
   }
 
   setupEventListeners() {
+    // Triple-click logo for admin activation (hidden)
+    let clickCount = 0;
+    let clickTimer;
+    const appTitle = document.querySelector(".app-title");
+
+    appTitle.addEventListener("click", () => {
+      clickCount++;
+      clearTimeout(clickTimer);
+
+      if (clickCount === 3) {
+        this.showAdminPrompt();
+        clickCount = 0;
+      }
+
+      // Reset click count after 1 second
+      clickTimer = setTimeout(() => {
+        clickCount = 0;
+      }, 1000);
+    });
+
     // Collapse library button
     document
       .getElementById("collapseLibraryBtn")
@@ -155,6 +242,12 @@ class DJRankApp {
   }
 
   enterDeleteMode() {
+    // Only allow delete mode for admins
+    if (!this.isAdmin) {
+      console.log("👁️ View-only mode - login required to edit");
+      return;
+    }
+
     this.deleteMode = true;
     document.querySelectorAll(".tier-drop-zone").forEach((zone) => {
       zone.classList.add("delete-mode");
@@ -182,6 +275,12 @@ class DJRankApp {
   closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
+      // Pause all videos in the modal before closing
+      modal.querySelectorAll("video").forEach((video) => {
+        video.pause();
+        video.currentTime = 0;
+      });
+
       modal.classList.remove("active");
     }
   }
@@ -381,6 +480,20 @@ class DJRankApp {
   createSearchResultCard(dj) {
     const card = document.createElement("div");
     card.className = "artist-card search-result";
+
+    // Only show add button for admins
+    const addButtonHTML = this.isAdmin
+      ? `
+      <button class="add-artist-btn" data-dj-id="${dj.id}" 
+              style="position: absolute; bottom: -10px; right: -10px; width: 35px; height: 35px; 
+                     border-radius: 50%; background: rgba(138, 180, 248, 0.9); border: 2px solid white;
+                     color: white; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center;
+                     justify-content: center; font-weight: bold; transition: all 0.3s ease;">
+        +
+      </button>
+    `
+      : "";
+
     card.innerHTML = `
       <div style="position: relative;">
         <img src="${
@@ -390,27 +503,23 @@ class DJRankApp {
         }" 
              alt="${dj.name}" 
              class="artist-avatar">
-        <button class="add-artist-btn" data-dj-id="${dj.id}" 
-                style="position: absolute; bottom: -10px; right: -10px; width: 35px; height: 35px; 
-                       border-radius: 50%; background: rgba(138, 180, 248, 0.9); border: 2px solid white;
-                       color: white; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center;
-                       justify-content: center; font-weight: bold; transition: all 0.3s ease;">
-          +
-        </button>
+        ${addButtonHTML}
       </div>
       <div class="artist-name">${dj.name}</div>
     `;
 
-    // Add click handler for the + button
-    const addBtn = card.querySelector(".add-artist-btn");
-    addBtn.addEventListener("click", async (e) => {
-      e.stopPropagation();
-      await this.addArtistFromSearch(dj._sourceData);
+    // Add click handler for the + button (only if admin)
+    if (this.isAdmin) {
+      const addBtn = card.querySelector(".add-artist-btn");
+      addBtn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        await this.addArtistFromSearch(dj._sourceData);
 
-      // Clear search and show library
-      document.getElementById("searchInput").value = "";
-      this.renderArtistGrid();
-    });
+        // Clear search and show library
+        document.getElementById("searchInput").value = "";
+        this.renderArtistGrid();
+      });
+    }
 
     // Make the card clickable to preview (not add)
     card.addEventListener("click", (e) => {
@@ -703,6 +812,9 @@ class DJRankApp {
     this.loadMediaPreviews(dj);
 
     this.openModal("djDetailModal");
+
+    // Update UI for admin/public mode
+    this.updateUIForAdminMode();
   }
 
   setupCriteriaRating() {
@@ -790,6 +902,8 @@ class DJRankApp {
         visuals: parseInt(document.getElementById("visualsRating").value) || 0,
         guests: parseInt(document.getElementById("guestsRating").value) || 0,
       },
+      photos: this.currentDJ.photos || [],
+      videos: this.currentDJ.videos || [],
     };
 
     try {
@@ -807,20 +921,63 @@ class DJRankApp {
     if (!files || files.length === 0) return;
 
     const photoPreview = document.getElementById("photoPreview");
+    const saveBtn = document.getElementById("saveDetailBtn");
 
     for (const file of files) {
-      try {
-        const url = await DB.uploadFile(file, "dj-photos");
+      // Create loading placeholder
+      const loadingDiv = document.createElement("div");
+      loadingDiv.className = "media-loading";
+      loadingDiv.innerHTML = `
+        <div class="loading-spinner"></div>
+        <p>Uploading ${file.name}...</p>
+        <p class="file-size">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+      `;
+      photoPreview.appendChild(loadingDiv);
 
-        const img = document.createElement("img");
-        img.src = url;
-        photoPreview.appendChild(img);
+      // Disable save button
+      this.uploadsInProgress++;
+      this.updateSaveButtonState();
+
+      try {
+        const url = await DB.uploadFile(file);
+
+        // Remove loading placeholder
+        loadingDiv.remove();
+
+        // Create image with click to expand
+        const wrapper = document.createElement("div");
+        wrapper.className = "media-item";
+        wrapper.innerHTML = `
+          <img src="${url}" alt="DJ Photo">
+          <button class="remove-media-btn" title="Remove">×</button>
+        `;
+
+        // Click to expand
+        wrapper.querySelector("img").addEventListener("click", () => {
+          this.expandMedia(url, "image");
+        });
+
+        // Remove button
+        wrapper
+          .querySelector(".remove-media-btn")
+          .addEventListener("click", (e) => {
+            e.stopPropagation();
+            wrapper.remove();
+            const index = this.currentDJ.photos.indexOf(url);
+            if (index > -1) this.currentDJ.photos.splice(index, 1);
+          });
+
+        photoPreview.appendChild(wrapper);
 
         // Store URL in current DJ
         if (!this.currentDJ.photos) this.currentDJ.photos = [];
         this.currentDJ.photos.push(url);
       } catch (error) {
         console.error("Error uploading photo:", error);
+        loadingDiv.innerHTML = `<p style="color: #ff4444;">Upload failed: ${error.message}</p>`;
+      } finally {
+        this.uploadsInProgress--;
+        this.updateSaveButtonState();
       }
     }
   }
@@ -831,19 +988,61 @@ class DJRankApp {
     const videoPreview = document.getElementById("videoPreview");
 
     for (const file of files) {
-      try {
-        const url = await DB.uploadFile(file, "dj-videos");
+      // Create loading placeholder
+      const loadingDiv = document.createElement("div");
+      loadingDiv.className = "media-loading";
+      loadingDiv.innerHTML = `
+        <div class="loading-spinner"></div>
+        <p>Uploading ${file.name}...</p>
+        <p class="file-size">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+        <p class="upload-hint">This may take a minute...</p>
+      `;
+      videoPreview.appendChild(loadingDiv);
 
-        const video = document.createElement("video");
-        video.src = url;
-        video.controls = true;
-        videoPreview.appendChild(video);
+      // Disable save button
+      this.uploadsInProgress++;
+      this.updateSaveButtonState();
+
+      try {
+        const url = await DB.uploadFile(file);
+
+        // Remove loading placeholder
+        loadingDiv.remove();
+
+        // Create video with click to expand
+        const wrapper = document.createElement("div");
+        wrapper.className = "media-item";
+        wrapper.innerHTML = `
+          <video src="${url}" controls></video>
+          <button class="remove-media-btn" title="Remove">×</button>
+        `;
+
+        // Click to expand
+        wrapper.querySelector("video").addEventListener("click", () => {
+          this.expandMedia(url, "video");
+        });
+
+        // Remove button
+        wrapper
+          .querySelector(".remove-media-btn")
+          .addEventListener("click", (e) => {
+            e.stopPropagation();
+            wrapper.remove();
+            const index = this.currentDJ.videos.indexOf(url);
+            if (index > -1) this.currentDJ.videos.splice(index, 1);
+          });
+
+        videoPreview.appendChild(wrapper);
 
         // Store URL in current DJ
         if (!this.currentDJ.videos) this.currentDJ.videos = [];
         this.currentDJ.videos.push(url);
       } catch (error) {
         console.error("Error uploading video:", error);
+        loadingDiv.innerHTML = `<p style="color: #ff4444;">Upload failed: ${error.message}</p>`;
+      } finally {
+        this.uploadsInProgress--;
+        this.updateSaveButtonState();
       }
     }
   }
@@ -857,20 +1056,129 @@ class DJRankApp {
 
     if (dj.photos && dj.photos.length > 0) {
       dj.photos.forEach((url) => {
-        const img = document.createElement("img");
-        img.src = url;
-        photoPreview.appendChild(img);
+        const wrapper = document.createElement("div");
+        wrapper.className = "media-item";
+        wrapper.innerHTML = `
+          <img src="${url}" alt="DJ Photo">
+          <button class="remove-media-btn" title="Remove">×</button>
+        `;
+
+        // Click to expand
+        wrapper.querySelector("img").addEventListener("click", () => {
+          this.expandMedia(url, "image");
+        });
+
+        // Remove button (admin only)
+        if (this.isAdmin) {
+          wrapper
+            .querySelector(".remove-media-btn")
+            .addEventListener("click", (e) => {
+              e.stopPropagation();
+              wrapper.remove();
+              const index = this.currentDJ.photos.indexOf(url);
+              if (index > -1) this.currentDJ.photos.splice(index, 1);
+            });
+        } else {
+          wrapper.querySelector(".remove-media-btn").remove();
+        }
+
+        photoPreview.appendChild(wrapper);
       });
     }
 
     if (dj.videos && dj.videos.length > 0) {
       dj.videos.forEach((url) => {
-        const video = document.createElement("video");
-        video.src = url;
-        video.controls = true;
-        videoPreview.appendChild(video);
+        const wrapper = document.createElement("div");
+        wrapper.className = "media-item";
+        wrapper.innerHTML = `
+          <video src="${url}" controls></video>
+          <button class="remove-media-btn" title="Remove">×</button>
+        `;
+
+        // Click to expand
+        wrapper.querySelector("video").addEventListener("click", () => {
+          this.expandMedia(url, "video");
+        });
+
+        // Remove button (admin only)
+        if (this.isAdmin) {
+          wrapper
+            .querySelector(".remove-media-btn")
+            .addEventListener("click", (e) => {
+              e.stopPropagation();
+              wrapper.remove();
+              const index = this.currentDJ.videos.indexOf(url);
+              if (index > -1) this.currentDJ.videos.splice(index, 1);
+            });
+        } else {
+          wrapper.querySelector(".remove-media-btn").remove();
+        }
+
+        videoPreview.appendChild(wrapper);
       });
     }
+  }
+
+  updateSaveButtonState() {
+    const saveBtn = document.getElementById("saveDetailBtn");
+    if (!saveBtn) return;
+
+    if (this.uploadsInProgress > 0) {
+      saveBtn.disabled = true;
+      saveBtn.style.opacity = "0.5";
+      saveBtn.style.cursor = "not-allowed";
+      saveBtn.textContent = `⏳ Uploading (${this.uploadsInProgress})...`;
+    } else {
+      saveBtn.disabled = false;
+      saveBtn.style.opacity = "1";
+      saveBtn.style.cursor = "pointer";
+      saveBtn.textContent = "💾 Save Changes";
+    }
+  }
+
+  expandMedia(url, type) {
+    // Create lightbox overlay
+    const lightbox = document.createElement("div");
+    lightbox.className = "media-lightbox";
+    lightbox.innerHTML = `
+      <div class="lightbox-content">
+        ${
+          type === "image"
+            ? `<img src="${url}" alt="Full size">`
+            : `<video src="${url}" controls autoplay></video>`
+        }
+        <button class="lightbox-close">×</button>
+      </div>
+    `;
+
+    // Function to properly close lightbox
+    const closeLightbox = () => {
+      // Pause video if it's playing
+      const video = lightbox.querySelector("video");
+      if (video) {
+        video.pause();
+        video.currentTime = 0;
+      }
+      lightbox.remove();
+      document.removeEventListener("keydown", handleEscape);
+    };
+
+    // Close on click
+    lightbox.addEventListener("click", (e) => {
+      if (e.target === lightbox || e.target.className === "lightbox-close") {
+        closeLightbox();
+      }
+    });
+
+    // Close on escape key
+    const handleEscape = (e) => {
+      if (e.key === "Escape") {
+        closeLightbox();
+      }
+    };
+    document.addEventListener("keydown", handleEscape);
+
+    document.body.appendChild(lightbox);
   }
 
   formatNumber(num) {

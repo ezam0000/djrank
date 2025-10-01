@@ -1,169 +1,275 @@
 # DJ RANK 🎧
 
-An interactive web application for ranking DJs using a tier-based system with custom criteria evaluation.
+Interactive web application for ranking DJs using a tier-based system with Spotify integration and secure admin authentication.
 
-## Features
+**Live Demo:** https://djrank.vercel.app
 
-✨ **Beautiful Glassmorphism UI** - Dark mode with liquid glass design effects  
-🎯 **Tier Ranking** - Drag & drop DJs into S-F tiers  
-📊 **Criteria Scoring** - Rate DJs on Flow, Vibes, Visuals, and Guests (0-3 points each)  
-🔍 **Artist Search** - Pull DJ data from Spotify API with real photos  
-🎵 **Music Links** - Connect to SoundCloud, Spotify, and Apple Music  
-💾 **Persistent Storage** - localStorage (Vercel Postgres coming soon)  
-📱 **Mobile-First** - Responsive design with touch gestures
+---
 
-## Quick Start
+## ✨ Features
 
-### 1. Install Dependencies
+- **🎯 Tier Ranking** - Drag & drop DJs into S-F tiers
+- **📊 Criteria Scoring** - Rate DJs on Flow, Vibes, Visuals, Guests (0-3 each)
+- **🔍 Spotify Search** - Real-time artist search with photos and stats
+- **🎵 Music Links** - Direct links to Spotify app/web and SoundCloud
+- **📷 Media Galleries** - Upload photos/videos with lightbox viewing
+- **🔐 Admin Authentication** - Secure token-based editing system
+- **👁️ Public View** - Share rankings with read-only access
+- **💾 Cloud Database** - Vercel Postgres for persistent storage
+- **📱 Mobile-First** - Responsive design with touch gestures
+- **🌙 Glassmorphism UI** - Dark mode with liquid glass effects
+
+---
+
+## 🚀 Quick Start
+
+### 1. Clone & Install
 
 ```bash
+git clone https://github.com/yourusername/djrank.git
+cd djrank
 npm install
 ```
 
-### 2. Configure Spotify API
+### 2. Configure Environment
 
-Get your Spotify API credentials at [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
+```bash
+# Pull environment variables from Vercel
+vercel env pull .env.local
 
-Update `public/config.js`:
-
-```javascript
-spotify: {
-  clientId: "YOUR_CLIENT_ID",
-  clientSecret: "YOUR_CLIENT_SECRET"
-}
+# Or create .env.local manually:
+SPOTIFY_CLIENT_ID=your_spotify_client_id
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+ADMIN_SECRET=your_64_character_admin_token
+POSTGRES_URL=your_postgres_connection_string
 ```
 
-### 3. Run the App
+### 3. Run Locally
 
 ```bash
 npm start
 ```
 
-Open [http://localhost:3003](http://localhost:3003) in your browser.
+Open http://localhost:3003
 
-## Deployment
+---
 
-### Deploy to Vercel
+## 🔐 Admin Access
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/djrank)
+### For Public Users:
 
-1. Push your code to GitHub
-2. Import project in Vercel
-3. Add environment variables:
-   - `SPOTIFY_CLIENT_ID`
-   - `SPOTIFY_CLIENT_SECRET`
-4. Deploy!
+- Browse all rankings
+- View criteria breakdowns
+- Click music links
+- View photo/video galleries
+- **Cannot edit**
 
-Your app will be live at `https://your-project.vercel.app`
+### For Admin:
 
-## Usage
+1. Triple-click "DJ RANK" logo
+2. Enter your admin token
+3. Full editing enabled
 
-### Adding DJs
+---
 
-1. Type in the search box at the top
-2. Search results appear from Spotify with real artist photos
-3. Click the **"+"** button on any artist to add them
-4. DJ appears in your Artist Library
+## 📊 Tier System
 
-### Ranking DJs
+| Tier  | Score | Description               |
+| ----- | ----- | ------------------------- |
+| **S** | 11-12 | Elite - the absolute best |
+| **A** | 9-10  | Excellent                 |
+| **B** | 7-8   | Very good                 |
+| **C** | 5-6   | Good                      |
+| **D** | 3-4   | Average                   |
+| **E** | 1-2   | Below average             |
+| **F** | 0     | Needs improvement         |
 
-**Method 1: Criteria-based Ranking**
+### Criteria (0-3 points each):
 
-1. Click on a DJ's image to open details
-2. Rate them on each criterion (0-3 points)
-3. View the suggested tier based on total score
-4. Click "Apply to Tier" to place them
+- **Flow** - Mixing skills, track selection, energy
+- **Vibes** - Atmosphere, crowd connection, presence
+- **Visuals** - Production quality, lighting, aesthetic
+- **Guests** - Featured artists and collaborations
 
-**Method 2: Manual Drag & Drop**
+---
 
-1. Drag a DJ's image from the Artist Library
-2. Drop into any tier (S, A, B, C, D, E, F)
-3. Rearrange by dragging between tiers
+## 🛠️ Tech Stack
 
-**Mobile:** Long-press any DJ in a tier to enter wiggle mode, then tap × to remove
+**Frontend:**
 
-### DJ Details
+- Vanilla JavaScript
+- HTML5 + CSS3
+- Glassmorphism design
 
-Click any DJ image to:
+**Backend:**
 
-- View artist bio and info
-- Rate them on criteria (Flow, Vibes, Visuals, Guests)
-- Add personal notes and commentary
-- Add music platform links (Spotify, SoundCloud, Apple Music)
+- Node.js + Express
+- Vercel Serverless Functions
+- Neon Postgres (serverless)
 
-## Tier System
+**APIs:**
 
-| Tier  | Score Range  | Description                    |
-| ----- | ------------ | ------------------------------ |
-| **S** | 11-12 points | Elite tier - the absolute best |
-| **A** | 9-10 points  | Excellent                      |
-| **B** | 7-8 points   | Very good                      |
-| **C** | 5-6 points   | Good                           |
-| **D** | 3-4 points   | Average                        |
-| **E** | 1-2 points   | Below average                  |
-| **F** | 0 points     | Needs improvement              |
+- Spotify Web API
+- SoundCloud (manual entry)
 
-## Criteria Explanation
+**Deployment:**
 
-- **Flow** (0-3): Mixing skills, track selection, energy management
-- **Vibes** (0-3): Atmosphere, crowd connection, stage presence
-- **Visuals** (0-3): Visual production, lighting, overall aesthetic
-- **Guests** (0-3): Quality of featured artists and collaborations
+- Vercel (auto-deploy from Git)
 
-## Project Structure
+---
+
+## 📁 Project Structure
 
 ```
 djrank/
+├── api/
+│   ├── djs.js                 # CRUD endpoint
+│   └── auth.js                # Authentication
 ├── public/
-│   ├── index.html          # Main HTML structure
-│   ├── styles.css          # Glassmorphism styling
-│   ├── config.js           # API configuration
-│   ├── storage.js          # localStorage wrapper
-│   ├── api-service.js      # Spotify API integration
-│   ├── drag-drop.js        # Drag & drop functionality
-│   └── app.js              # Main application logic
-├── server.js               # Express server
-├── vercel.json             # Vercel deployment config
-├── package.json            # Dependencies
-└── README.md               # This file
+│   ├── index.html             # HTML structure
+│   ├── styles.css             # Glassmorphism styles
+│   ├── app.js                 # Main logic
+│   ├── storage.js             # Database wrapper
+│   ├── api-service.js         # Spotify integration
+│   ├── drag-drop.js           # Drag & drop
+│   └── config.js              # Environment config
+├── documents/                 # Documentation
+├── server.js                  # Express server
+├── vercel.json                # Deployment config
+└── package.json               # Dependencies
 ```
 
-## Environment Variables
+---
 
-Create a `.env` file (or add to Vercel):
+## 🌐 Deployment
+
+### Deploy to Vercel
+
+1. **Push to GitHub:**
 
 ```bash
-# Required for artist search
-SPOTIFY_CLIENT_ID=your_client_id
-SPOTIFY_CLIENT_SECRET=your_client_secret
-
-# Optional
-SOUNDCLOUD_CLIENT_ID=your_soundcloud_id
+git add .
+git commit -m "Initial commit"
+git push origin main
 ```
 
-## Technologies Used
+2. **Import to Vercel:**
 
-- **Frontend**: Vanilla JavaScript, HTML5, CSS3
-- **Backend**: Node.js + Express
-- **Storage**: localStorage (Vercel Postgres coming soon)
-- **APIs**: Spotify Web API
-- **Deployment**: Vercel
-- **Design**: Glassmorphism / Liquid Glass aesthetic
+   - Go to https://vercel.com/new
+   - Import your repository
+   - Configure environment variables
 
-## Browser Support
+3. **Environment Variables:**
+
+```
+SPOTIFY_CLIENT_ID=...
+SPOTIFY_CLIENT_SECRET=...
+ADMIN_SECRET=...
+POSTGRES_URL=... (auto-configured)
+```
+
+4. **Deploy:**
+   - Vercel auto-deploys on every push to `main`
+   - Database auto-connects
+
+---
+
+## 📖 Usage Guide
+
+### Adding DJs (Admin Only)
+
+1. Type in search box
+2. Results appear from Spotify
+3. Click "+ Add" button
+4. DJ appears in library
+
+### Ranking DJs (Admin Only)
+
+**Method 1: Criteria-Based**
+
+1. Click DJ to open modal
+2. Rate on each criterion (0-3)
+3. View suggested tier
+4. Click "Apply to Tier"
+
+**Method 2: Drag & Drop**
+
+1. Drag DJ from library
+2. Drop into any tier
+3. Rearrange as needed
+
+### Uploading Media (Admin Only)
+
+1. Click DJ to open modal
+2. Click "Upload Photos" or "Upload Videos"
+3. Select compressed files (<1MB images, <15MB videos)
+4. Wait for upload to complete
+5. Click "Save Changes"
+
+**Recommended Compression:**
+
+- Images: WebP, 80% quality (use Squoosh)
+- Videos: MP4 H.264, RF 23-25 (use HandBrake)
+
+### Mobile Gestures
+
+- **Long-press** tier card → Enter delete mode (admin)
+- **Horizontal scroll** → Browse artist library
+- **Tap to expand** → View photos/videos fullscreen
+
+---
+
+## 🔒 Security
+
+- **64-character admin token** (cryptographically secure)
+- **Rate limiting** (5 attempts/hour per IP)
+- **Constant-time comparison** (prevents timing attacks)
+- **HTTPS enforced** (via Vercel)
+- **Public read-only** (GET requests only)
+- **Admin mutations** (POST/PUT/DELETE require token)
+
+---
+
+## 📱 Browser Support
 
 - Chrome/Edge 90+
 - Firefox 88+
 - Safari 14+
+- Mobile browsers (iOS Safari, Chrome Mobile)
 
-## Contributing
+---
 
-This is a personal project, but suggestions are welcome!
+## 📚 Documentation
 
-## License
+Detailed docs in `/documents/`:
+
+- `PROJECT_OVERVIEW.md` - Complete project guide
+- `SESSION_DEBRIEF_2025-10-01.md` - Implementation summary
+- `ADMIN_AUTH_PLAN.md` - Authentication system
+- `PUBLIC_VIEW_AUDIT.md` - Public view security
+- `MEDIA_UPLOAD_SYSTEM.md` - Upload functionality
+
+---
+
+## 🐛 Known Limitations
+
+- Base64 media storage (+33% file size overhead)
+- Manual image compression required
+- Single admin user
+- SoundCloud API pending (manual entry works)
+
+---
+
+## 🤝 Contributing
+
+This is a personal project, but suggestions are welcome via issues!
+
+---
+
+## 📄 License
 
 MIT
 
 ---
 
-Built with ❤️ for DJ culture
+**Built with ❤️ for DJ culture**
