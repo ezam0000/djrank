@@ -127,12 +127,6 @@
               placeholder="Spotify URL"
               id="djSpotify"
             />
-            <input
-              type="url"
-              class="glass-input"
-              placeholder="Apple Music URL"
-              id="djAppleMusic"
-            />
             <button type="submit" class="glass-btn primary">Add DJ</button>
           </form>
         </div>
@@ -156,8 +150,13 @@
               </div>
 
               <div class="music-links">
-                <h3>Music Links</h3>
-                <div class="link-inputs">
+                <h3>🎧 Listen Now</h3>
+                <!-- Music link buttons (public view) -->
+                <div class="music-buttons" id="musicButtons">
+                  <!-- Dynamically populated -->
+                </div>
+                <!-- Music link inputs (admin edit mode) -->
+                <div class="link-inputs" id="musicInputs" style="display: none">
                   <input
                     type="url"
                     class="glass-input"
@@ -170,13 +169,13 @@
                     placeholder="Spotify URL"
                     id="detailSpotify"
                   />
-                  <input
-                    type="url"
-                    class="glass-input"
-                    placeholder="Apple Music URL"
-                    id="detailAppleMusic"
-                  />
                 </div>
+              </div>
+
+              <!-- Criteria Breakdown (Public View) -->
+              <div class="criteria-breakdown" id="criteriaBreakdown">
+                <h3>📊 Ranking Breakdown</h3>
+                <!-- Dynamically populated -->
               </div>
 
               <div class="criteria-ranking">

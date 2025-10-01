@@ -353,7 +353,6 @@ class DJRankApp {
         image: artist.image,
         soundcloud_url: artist.source === "soundcloud" ? artist.url : "",
         spotify_url: artist.source === "spotify" ? artist.url : "",
-        apple_music_url: "",
         tier: null,
         criteria: { flow: 0, vibes: 0, visuals: 0, guests: 0 },
         notes: "",
@@ -483,7 +482,6 @@ class DJRankApp {
       image: artist.image,
       soundcloud_url: artist.source === "soundcloud" ? artist.url : "",
       spotify_url: artist.source === "spotify" ? artist.url : "",
-      apple_music_url: "",
       tier: null,
       criteria: { flow: 0, vibes: 0, visuals: 0, guests: 0 },
       notes: "",
@@ -515,7 +513,6 @@ class DJRankApp {
       image: document.getElementById("djImage").value,
       soundcloud_url: document.getElementById("djSoundcloud").value,
       spotify_url: document.getElementById("djSpotify").value,
-      apple_music_url: document.getElementById("djAppleMusic").value,
       tier: null,
       criteria: { flow: 0, vibes: 0, visuals: 0, guests: 0 },
       notes: "",
@@ -539,6 +536,130 @@ class DJRankApp {
     }
   }
 
+  renderCriteriaBreakdown(dj) {
+    const container = document.getElementById("criteriaBreakdown");
+    const criteria = dj.criteria || {
+      flow: 0,
+      vibes: 0,
+      visuals: 0,
+      guests: 0,
+    };
+
+    // Calculate total
+    const total =
+      criteria.flow + criteria.vibes + criteria.visuals + criteria.guests;
+
+    // Determine tier from score
+    const getTierFromScore = (score) => {
+      if (score >= 11) return "S";
+      if (score >= 9) return "A";
+      if (score >= 7) return "B";
+      if (score >= 5) return "C";
+      if (score >= 3) return "D";
+      if (score >= 1) return "E";
+      return "F";
+    };
+
+    const suggestedTier = getTierFromScore(total);
+
+    // Generate star rating
+    const getStars = (value) => {
+      const filled = "⭐".repeat(value);
+      const empty = "☆".repeat(3 - value);
+      return filled + empty;
+    };
+
+    // Get rating description
+    const getDescription = (value) => {
+      if (value === 3) return "Excellent";
+      if (value === 2) return "Good";
+      if (value === 1) return "Below Average";
+      return "Not Rated";
+    };
+
+    container.innerHTML = `
+      <div class="breakdown-item">
+        <span class="breakdown-label">Flow:</span>
+        <span class="breakdown-stars">${getStars(criteria.flow)}</span>
+        <span class="breakdown-score">(${criteria.flow}/3)</span>
+        <span class="breakdown-desc">${getDescription(criteria.flow)}</span>
+      </div>
+      <div class="breakdown-item">
+        <span class="breakdown-label">Vibes:</span>
+        <span class="breakdown-stars">${getStars(criteria.vibes)}</span>
+        <span class="breakdown-score">(${criteria.vibes}/3)</span>
+        <span class="breakdown-desc">${getDescription(criteria.vibes)}</span>
+      </div>
+      <div class="breakdown-item">
+        <span class="breakdown-label">Visuals:</span>
+        <span class="breakdown-stars">${getStars(criteria.visuals)}</span>
+        <span class="breakdown-score">(${criteria.visuals}/3)</span>
+        <span class="breakdown-desc">${getDescription(criteria.visuals)}</span>
+      </div>
+      <div class="breakdown-item">
+        <span class="breakdown-label">Guests:</span>
+        <span class="breakdown-stars">${getStars(criteria.guests)}</span>
+        <span class="breakdown-score">(${criteria.guests}/3)</span>
+        <span class="breakdown-desc">${getDescription(criteria.guests)}</span>
+      </div>
+      <div class="breakdown-total">
+        <strong>Total: ${total}/12</strong>
+        <span class="breakdown-tier">→ Tier ${suggestedTier}</span>
+      </div>
+    `;
+  }
+
+  renderMusicLinks(dj) {
+    const container = document.getElementById("musicButtons");
+    container.innerHTML = "";
+
+    // Extract Spotify artist ID from URL
+    const getSpotifyId = (url) => {
+      if (!url) return null;
+      const match = url.match(/artist\/([a-zA-Z0-9]+)/);
+      return match ? match[1] : null;
+    };
+
+    // Spotify buttons
+    if (dj.spotify_url) {
+      const spotifyId = getSpotifyId(dj.spotify_url);
+
+      // Primary: Open in Spotify app
+      const spotifyAppBtn = document.createElement("a");
+      spotifyAppBtn.href = spotifyId
+        ? `spotify:artist:${spotifyId}`
+        : dj.spotify_url;
+      spotifyAppBtn.className = "music-btn spotify-btn";
+      spotifyAppBtn.innerHTML = "🟢 Open in Spotify App";
+      spotifyAppBtn.target = "_blank";
+      container.appendChild(spotifyAppBtn);
+
+      // Fallback: Open in web player
+      const spotifyWebBtn = document.createElement("a");
+      spotifyWebBtn.href = dj.spotify_url;
+      spotifyWebBtn.className = "music-btn spotify-web-btn";
+      spotifyWebBtn.innerHTML = "🌐 Spotify Web Player";
+      spotifyWebBtn.target = "_blank";
+      container.appendChild(spotifyWebBtn);
+    }
+
+    // SoundCloud button (if URL exists)
+    if (dj.soundcloud_url) {
+      const soundcloudBtn = document.createElement("a");
+      soundcloudBtn.href = dj.soundcloud_url;
+      soundcloudBtn.className = "music-btn soundcloud-btn";
+      soundcloudBtn.innerHTML = "🟠 SoundCloud";
+      soundcloudBtn.target = "_blank";
+      container.appendChild(soundcloudBtn);
+    }
+
+    // If no music links
+    if (!dj.spotify_url && !dj.soundcloud_url) {
+      container.innerHTML =
+        '<p style="color: var(--text-muted); font-size: 0.9rem;">No music links available</p>';
+    }
+  }
+
   openDJDetail(djId) {
     const dj = this.djs.find((d) => d.id === djId);
     if (!dj) return;
@@ -552,10 +673,15 @@ class DJRankApp {
     document.getElementById("djDetailBio").textContent =
       dj.bio || "No bio available";
 
+    // Update music links (show buttons by default, inputs for admin mode later)
+    this.renderMusicLinks(dj);
+
+    // Update criteria breakdown (public view)
+    this.renderCriteriaBreakdown(dj);
+
+    // Also update the input fields (for admin edit mode)
     document.getElementById("detailSoundcloud").value = dj.soundcloud_url || "";
     document.getElementById("detailSpotify").value = dj.spotify_url || "";
-    document.getElementById("detailAppleMusic").value =
-      dj.apple_music_url || "";
 
     document.getElementById("djNotes").value = dj.notes || "";
 
@@ -657,7 +783,6 @@ class DJRankApp {
     const updates = {
       soundcloud_url: document.getElementById("detailSoundcloud").value,
       spotify_url: document.getElementById("detailSpotify").value,
-      apple_music_url: document.getElementById("detailAppleMusic").value,
       notes: document.getElementById("djNotes").value,
       criteria: {
         flow: parseInt(document.getElementById("flowRating").value) || 0,
