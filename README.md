@@ -34,14 +34,14 @@ The app works out-of-the-box with localStorage. For cloud storage and media uplo
 npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3003](http://localhost:3003) in your browser.
 
 ### 4. Reset Data (Optional)
 
 To reload the app with fresh Vegas 2025 DJ data:
 
 ```
-Visit http://localhost:3000/clear-data.html
+Visit http://localhost:3003/clear-data.html
 ```
 
 ## Included DJs

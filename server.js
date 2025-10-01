@@ -2,7 +2,7 @@ const express = require("express");
 const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3003;
 
 app.use(express.json());
 app.use(express.static("public"));
@@ -13,4 +13,5 @@ app.get("/", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`🎧 DJ Rank server running at http://localhost:${PORT}`);
+  console.log(`📱 Clear data: http://localhost:${PORT}/clear-data.html`);
 });
