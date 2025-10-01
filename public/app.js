@@ -234,25 +234,37 @@ class DJRankApp {
 
       // Long press for mobile delete mode
       let pressTimer;
-      card.addEventListener("touchstart", (e) => {
-        if (!this.deleteMode) {
-          pressTimer = setTimeout(() => {
-            this.enterDeleteMode();
-            // Vibrate if supported
-            if (navigator.vibrate) {
-              navigator.vibrate(50);
-            }
-          }, 500); // 500ms long press
-        }
-      });
+      card.addEventListener(
+        "touchstart",
+        (e) => {
+          if (!this.deleteMode) {
+            pressTimer = setTimeout(() => {
+              this.enterDeleteMode();
+              // Vibrate if supported
+              if (navigator.vibrate) {
+                navigator.vibrate(50);
+              }
+            }, 500); // 500ms long press
+          }
+        },
+        { passive: true }
+      );
 
-      card.addEventListener("touchend", () => {
-        clearTimeout(pressTimer);
-      });
+      card.addEventListener(
+        "touchend",
+        () => {
+          clearTimeout(pressTimer);
+        },
+        { passive: true }
+      );
 
-      card.addEventListener("touchmove", () => {
-        clearTimeout(pressTimer);
-      });
+      card.addEventListener(
+        "touchmove",
+        () => {
+          clearTimeout(pressTimer);
+        },
+        { passive: true }
+      );
     }
 
     // Make draggable
@@ -396,10 +408,9 @@ class DJRankApp {
       e.stopPropagation();
       await this.addArtistFromSearch(dj._sourceData);
 
-      // Remove the card or replace with "Added" state
-      addBtn.textContent = "✓";
-      addBtn.style.background = "#00ff88";
-      addBtn.style.pointerEvents = "none";
+      // Clear search and show library
+      document.getElementById("searchInput").value = "";
+      this.renderArtistGrid();
     });
 
     // Make the card clickable to preview (not add)
@@ -413,9 +424,13 @@ class DJRankApp {
     return card;
   }
 
-  previewArtist(dj) {
+  async previewArtist(dj) {
     // Quick preview - for now just add them
-    this.addArtistFromSearch(dj._sourceData);
+    await this.addArtistFromSearch(dj._sourceData);
+
+    // Clear search and show library
+    document.getElementById("searchInput").value = "";
+    this.renderArtistGrid();
   }
 
   async searchArtists() {

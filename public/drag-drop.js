@@ -84,17 +84,10 @@ class DragDropManager {
       // Update DJ tier in database
       await DB.updateDJ(this.draggedDJId, { tier });
 
-      // Get the DJ data and recreate card with remove button
-      const dj = window.app.djs.find((d) => d.id === this.draggedDJId);
-      if (dj) {
-        const card = window.app.createArtistCard(dj, true); // true = show remove button
-        e.currentTarget.appendChild(card);
-      }
-
-      // Remove from original location if it was in a tier
-      if (this.draggedElement.closest(".tier-drop-zone")) {
-        this.draggedElement.remove();
-      }
+      // Reload DJs from database and refresh UI
+      await window.app.loadDJs();
+      window.app.renderArtistGrid();
+      window.app.loadTierRankings();
 
       console.log(`✅ DJ moved to tier ${tier}`);
     }

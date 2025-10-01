@@ -1,46 +1,75 @@
-// Local Storage Management
-// Simple localStorage-based storage for DJ data
+// Database Storage Management
+// Uses Vercel Postgres via API endpoints
 
 const DB = {
   // Get all DJs
   async getDJs() {
-    return JSON.parse(localStorage.getItem("djs") || "[]");
+    try {
+      const response = await fetch("/api/djs");
+      if (!response.ok) throw new Error("Failed to fetch DJs");
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching DJs:", error);
+      return [];
+    }
   },
 
   // Add new DJ
   async addDJ(djData) {
-    const djs = JSON.parse(localStorage.getItem("djs") || "[]");
-    const newDJ = {
-      id: Date.now().toString(),
-      ...djData,
-      created_at: new Date().toISOString(),
-    };
-    djs.push(newDJ);
-    localStorage.setItem("djs", JSON.stringify(djs));
-    return newDJ;
+    try {
+      const newDJ = {
+        id: Date.now().toString(),
+        ...djData,
+        created_at: new Date().toISOString(),
+      };
+
+      const response = await fetch("/api/djs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newDJ),
+      });
+
+      if (!response.ok) throw new Error("Failed to add DJ");
+      return await response.json();
+    } catch (error) {
+      console.error("Error adding DJ:", error);
+      return null;
+    }
   },
 
   // Update DJ
   async updateDJ(id, updates) {
-    const djs = JSON.parse(localStorage.getItem("djs") || "[]");
-    const index = djs.findIndex((dj) => dj.id === id);
-    if (index !== -1) {
-      djs[index] = { ...djs[index], ...updates };
-      localStorage.setItem("djs", JSON.stringify(djs));
-      return djs[index];
+    try {
+      const response = await fetch(`/api/djs?id=${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+
+      if (!response.ok) throw new Error("Failed to update DJ");
+      return await response.json();
+    } catch (error) {
+      console.error("Error updating DJ:", error);
+      return null;
     }
-    return null;
   },
 
   // Delete DJ
   async deleteDJ(id) {
-    const djs = JSON.parse(localStorage.getItem("djs") || "[]");
-    const filtered = djs.filter((dj) => dj.id !== id);
-    localStorage.setItem("djs", JSON.stringify(filtered));
-    return true;
+    try {
+      const response = await fetch(`/api/djs?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) throw new Error("Failed to delete DJ");
+      return true;
+    } catch (error) {
+      console.error("Error deleting DJ:", error);
+      return false;
+    }
   },
 
-  // Upload file - returns base64 for localStorage
+  // Upload file - returns base64
   async uploadFile(file) {
     return new Promise((resolve) => {
       const reader = new FileReader();
@@ -50,4 +79,4 @@ const DB = {
   },
 };
 
-console.log("✅ Storage initialized (localStorage)");
+console.log("✅ Storage initialized (Vercel Postgres)");

@@ -1,5 +1,71 @@
 ---
-description:
+description: General development rules for this project
 globs:
 alwaysApply: true
 ---
+
+# Development Rules
+
+## Code Changes
+
+- Only make changes I explicitly request
+- If you have suggestions, mention them as comments - don't implement unless approved
+- Prioritize simplicity and elegance - avoid unnecessary complexity
+- Do not append code blindly - place changes in their correct logical locations
+- Never hallucinate - if unsure about code/files/context, inspect them first
+- Finish tasks completely before ending your turn
+- Minimal code changes when fixing issues
+
+## Security & Environment
+
+- **NEVER hardcode API keys, secrets, or credentials in code**
+- Always use environment variables for sensitive data
+- Use `dotenv` for local development
+- Keep `.env` in `.gitignore`
+- Client-side code should fetch config from server API endpoints
+- Verify no secrets are exposed in client-side code before deploying
+
+## Terminal & Deployment
+
+- **NEVER run terminal commands without explicit permission**
+- **NEVER auto-deploy to production** - only after:
+  1. Testing locally successfully
+  2. Code is committed to git
+  3. User explicitly approves deployment
+- Don't run npm install/start automatically - let user control terminal
+- Always test locally before pushing to production
+
+## Code Quality
+
+- Do not introduce linter or formatting errors
+- Never generate extremely long hashes or non-textual code
+- Avoid fallback or bloated code - keep logic lean
+- No hardcoded values or manually modified databases
+- Challenge assumptions and correct errors honestly
+- Be lint-aware
+
+## Architecture
+
+- Keep code modular - don't bloat server.js or client.js unnecessarily
+- Separate concerns into appropriate files
+- Use appropriate storage solutions (localStorage → cloud when needed)
+- Follow mobile-first design principles
+- Maintain glassmorphism/liquid glass design language
+
+## Planning
+
+- Create plans in markdown before making changes for complex tasks
+- Think through steps before using tools
+- Review outcomes and adjust accordingly
+- Use semantic search to understand codebase thoroughly
+
+## This Project Specifics
+
+- Port: 3003 (local development)
+- Storage: Vercel Postgres (cloud database) via `/api/djs` endpoint
+- APIs: Spotify (required), SoundCloud (optional)
+- Deployment: Vercel with auto-deploy from git
+- Design: Dark mode, glassmorphism, mobile-first
+- No file uploads - images from Spotify API
+- Database: Neon Postgres (serverless) integrated with Vercel
+- Environment: `.env.local` for local dev, Vercel env vars for production

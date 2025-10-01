@@ -6,7 +6,6 @@ const APIService = {
     const clientId = CONFIG.apis.soundcloud.clientId;
 
     if (!clientId || clientId === "YOUR_SOUNDCLOUD_CLIENT_ID") {
-      console.warn("SoundCloud API not configured");
       return [];
     }
 
@@ -17,7 +16,7 @@ const APIService = {
         )}&client_id=${clientId}`
       );
 
-      if (!response.ok) throw new Error("SoundCloud API error");
+      if (!response.ok) return [];
 
       const data = await response.json();
       return data.map((user) => ({
@@ -31,7 +30,7 @@ const APIService = {
         followers: user.followers_count,
       }));
     } catch (error) {
-      console.error("SoundCloud search error:", error);
+      // Silently fail - SoundCloud is optional
       return [];
     }
   },

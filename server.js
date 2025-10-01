@@ -1,4 +1,5 @@
-require("dotenv").config();
+require("dotenv").config({ path: ".env.local" });
+require("dotenv").config(); // Fallback to .env
 const express = require("express");
 const path = require("path");
 
@@ -13,15 +14,20 @@ app.get("/api/config", (req, res) => {
   res.json({
     apis: {
       soundcloud: {
-        clientId: process.env.SOUNDCLOUD_CLIENT_ID || "YOUR_SOUNDCLOUD_CLIENT_ID"
+        clientId:
+          process.env.SOUNDCLOUD_CLIENT_ID || "YOUR_SOUNDCLOUD_CLIENT_ID",
       },
       spotify: {
         clientId: process.env.SPOTIFY_CLIENT_ID,
-        clientSecret: process.env.SPOTIFY_CLIENT_SECRET
-      }
-    }
+        clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+      },
+    },
   });
 });
+
+// API endpoint for DJs (Postgres)
+const djsHandler = require("./api/djs");
+app.all("/api/djs", djsHandler);
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
