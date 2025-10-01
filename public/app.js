@@ -12,6 +12,9 @@ class DJRankApp {
   async init() {
     console.log("🎧 Initializing DJ Rank App...");
 
+    // Wait for config to load
+    await configReady;
+
     // Load DJs from database or create sample data
     await this.loadDJs();
 
