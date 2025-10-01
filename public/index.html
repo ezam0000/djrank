@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DJ RANK</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Sticky Header -->
+    <header class="glass-header">
+      <h1 class="app-title">DJ RANK</h1>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+      <!-- Artist Library Section -->
+      <section class="artist-library glass-panel">
+        <div class="section-header">
+          <div class="header-left">
+            <h2>Artist Library</h2>
+            <button class="collapse-btn" id="collapseLibraryBtn">−</button>
+          </div>
+          <input
+            type="text"
+            class="glass-input search-input"
+            placeholder="🔍 Search artists..."
+            id="searchInput"
+          />
+        </div>
+        <div class="artist-grid-container" id="artistGridContainer">
+          <div class="artist-grid" id="artistGrid">
+            <!-- DJ cards will be dynamically added here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Delete Mode Overlay (Mobile) -->
+      <div class="delete-mode-overlay" id="deleteModeOverlay">
+        <button class="done-delete-btn" id="doneDeleteBtn">Done</button>
+      </div>
+
+      <!-- Tier Ranking Section -->
+      <section class="tier-ranking glass-panel">
+        <h2>Tier Ranking</h2>
+        <div class="tier-container">
+          <div class="tier-row" data-tier="S">
+            <div class="tier-label tier-s">S</div>
+            <div class="tier-drop-zone" data-tier="S"></div>
+          </div>
+          <div class="tier-row" data-tier="A">
+            <div class="tier-label tier-a">A</div>
+            <div class="tier-drop-zone" data-tier="A"></div>
+          </div>
+          <div class="tier-row" data-tier="B">
+            <div class="tier-label tier-b">B</div>
+            <div class="tier-drop-zone" data-tier="B"></div>
+          </div>
+          <div class="tier-row" data-tier="C">
+            <div class="tier-label tier-c">C</div>
+            <div class="tier-drop-zone" data-tier="C"></div>
+          </div>
+          <div class="tier-row" data-tier="D">
+            <div class="tier-label tier-d">D</div>
+            <div class="tier-drop-zone" data-tier="D"></div>
+          </div>
+          <div class="tier-row" data-tier="E">
+            <div class="tier-label tier-e">E</div>
+            <div class="tier-drop-zone" data-tier="E"></div>
+          </div>
+          <div class="tier-row" data-tier="F">
+            <div class="tier-label tier-f">F</div>
+            <div class="tier-drop-zone" data-tier="F"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Add DJ Modal -->
+    <div class="modal" id="addDJModal">
+      <div class="modal-content glass-modal">
+        <div class="modal-header">
+          <h2>Add New DJ</h2>
+          <button class="close-btn" data-modal="addDJModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="search-artist-section">
+            <input
+              type="text"
+              class="glass-input"
+              placeholder="Search SoundCloud/Spotify..."
+              id="artistSearchInput"
+            />
+            <button class="glass-btn" id="searchArtistBtn">Search</button>
+          </div>
+          <div class="search-results" id="searchResults"></div>
+          <div class="divider">OR</div>
+          <form id="manualDJForm">
+            <input
+              type="text"
+              class="glass-input"
+              placeholder="Artist Name"
+              id="djName"
+              required
+            />
+            <textarea
+              class="glass-input"
+              placeholder="Bio"
+              id="djBio"
+              rows="3"
+            ></textarea>
+            <input
+              type="url"
+              class="glass-input"
+              placeholder="Profile Image URL"
+              id="djImage"
+            />
+            <input
+              type="url"
+              class="glass-input"
+              placeholder="SoundCloud URL"
+              id="djSoundcloud"
+            />
+            <input
+              type="url"
+              class="glass-input"
+              placeholder="Spotify URL"
+              id="djSpotify"
+            />
+            <input
+              type="url"
+              class="glass-input"
+              placeholder="Apple Music URL"
+              id="djAppleMusic"
+            />
+            <button type="submit" class="glass-btn primary">Add DJ</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- DJ Detail Modal -->
+    <div class="modal" id="djDetailModal">
+      <div class="modal-content glass-modal large">
+        <div class="modal-header">
+          <h2 id="djDetailName">DJ Name</h2>
+          <button class="close-btn" data-modal="djDetailModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="dj-detail-grid">
+            <!-- Left Column: Info & Criteria -->
+            <div class="left-column">
+              <div class="dj-profile">
+                <img id="djDetailImage" src="" alt="DJ Profile" />
+                <p id="djDetailBio" class="bio-text"></p>
+              </div>
+
+              <div class="music-links">
+                <h3>Music Links</h3>
+                <div class="link-inputs">
+                  <input
+                    type="url"
+                    class="glass-input"
+                    placeholder="SoundCloud URL"
+                    id="detailSoundcloud"
+                  />
+                  <input
+                    type="url"
+                    class="glass-input"
+                    placeholder="Spotify URL"
+                    id="detailSpotify"
+                  />
+                  <input
+                    type="url"
+                    class="glass-input"
+                    placeholder="Apple Music URL"
+                    id="detailAppleMusic"
+                  />
+                </div>
+              </div>
+
+              <div class="criteria-ranking">
+                <h3>Criteria Ranking (0-3 points each)</h3>
+                <div class="criteria-item">
+                  <label>Flow</label>
+                  <div class="rating-dots">
+                    <span class="dot" data-value="0"></span>
+                    <span class="dot" data-value="1"></span>
+                    <span class="dot" data-value="2"></span>
+                    <span class="dot" data-value="3"></span>
+                  </div>
+                  <input type="hidden" id="flowRating" value="0" />
+                </div>
+                <div class="criteria-item">
+                  <label>Vibes</label>
+                  <div class="rating-dots">
+                    <span class="dot" data-value="0"></span>
+                    <span class="dot" data-value="1"></span>
+                    <span class="dot" data-value="2"></span>
+                    <span class="dot" data-value="3"></span>
+                  </div>
+                  <input type="hidden" id="vibesRating" value="0" />
+                </div>
+                <div class="criteria-item">
+                  <label>Visuals</label>
+                  <div class="rating-dots">
+                    <span class="dot" data-value="0"></span>
+                    <span class="dot" data-value="1"></span>
+                    <span class="dot" data-value="2"></span>
+                    <span class="dot" data-value="3"></span>
+                  </div>
+                  <input type="hidden" id="visualsRating" value="0" />
+                </div>
+                <div class="criteria-item">
+                  <label>Guests</label>
+                  <div class="rating-dots">
+                    <span class="dot" data-value="0"></span>
+                    <span class="dot" data-value="1"></span>
+                    <span class="dot" data-value="2"></span>
+                    <span class="dot" data-value="3"></span>
+                  </div>
+                  <input type="hidden" id="guestsRating" value="0" />
+                </div>
+                <div class="total-score">
+                  <strong>Total Score:</strong>
+                  <span id="totalScore">0</span>/12
+                  <span class="suggested-tier"
+                    >Suggested Tier: <strong id="suggestedTier">F</strong></span
+                  >
+                </div>
+                <button class="glass-btn primary" id="applyTierBtn">
+                  Apply to Tier
+                </button>
+              </div>
+            </div>
+
+            <!-- Right Column: Media & Notes -->
+            <div class="right-column">
+              <div class="notes-section">
+                <h3>Notes</h3>
+                <textarea
+                  class="glass-input"
+                  id="djNotes"
+                  rows="6"
+                  placeholder="Add your thoughts about this DJ..."
+                ></textarea>
+              </div>
+
+              <div class="media-section">
+                <h3>Photos</h3>
+                <div class="media-upload">
+                  <input
+                    type="file"
+                    id="photoUpload"
+                    accept="image/*"
+                    multiple
+                    style="display: none"
+                  />
+                  <button
+                    class="glass-btn upload-btn"
+                    onclick="document.getElementById('photoUpload').click()"
+                  >
+                    📷 Upload Photos
+                  </button>
+                  <div class="media-preview" id="photoPreview"></div>
+                </div>
+              </div>
+
+              <div class="media-section">
+                <h3>Videos</h3>
+                <div class="media-upload">
+                  <input
+                    type="file"
+                    id="videoUpload"
+                    accept="video/*"
+                    multiple
+                    style="display: none"
+                  />
+                  <button
+                    class="glass-btn upload-btn"
+                    onclick="document.getElementById('videoUpload').click()"
+                  >
+                    🎥 Upload Videos
+                  </button>
+                  <div class="media-preview" id="videoPreview"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="glass-btn" id="saveDetailBtn">Save Changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="api-service.js"></script>
+    <script src="drag-drop.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

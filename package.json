@@ -1,19 +1,23 @@
 {
   "name": "djrank",
   "version": "1.0.0",
-  "private": true,
+  "description": "Interactive DJ ranking application with tier-based ranking system",
+  "main": "server.js",
   "scripts": {
-    "dev": "vercel dev"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
   "keywords": [
-    "tier",
+    "dj",
     "ranking",
-    "drag-and-drop"
+    "tier-list",
+    "music"
   ],
   "author": "",
   "license": "MIT",
-  "description": "Static DJ ranking interface for tier placement",
-  "devDependencies": {
-    "vercel": "^33.0.0"
-  }
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {}
 }
