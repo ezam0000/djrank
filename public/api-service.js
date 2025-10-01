@@ -106,22 +106,6 @@ const APIService = {
     return combined.sort((a, b) => (b.followers || 0) - (a.followers || 0));
   },
 
-  // Load Vegas 2025 DJs from JSON file
-  async loadVegasDJs() {
-    try {
-      const response = await fetch("/data/vegas-djs-2025.json");
-      if (!response.ok) {
-        console.warn("Could not load Vegas DJs, using fallback");
-        return this.getSampleDJs();
-      }
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error loading Vegas DJs:", error);
-      return this.getSampleDJs();
-    }
-  },
-
   // Get sample/demo DJs (fallback)
   getSampleDJs() {
     return [

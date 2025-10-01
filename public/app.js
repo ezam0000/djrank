@@ -28,10 +28,8 @@ class DJRankApp {
   async loadDJs() {
     this.djs = await DB.getDJs();
 
-    // Don't auto-load Vegas DJs - start with empty library
-    // Users can search and add DJs they want
     if (this.djs.length === 0) {
-      console.log("✨ DJ Library is empty - search to add artists!");
+      console.log("✨ DJ Library is empty - search Spotify to add artists!");
     }
   }
 
