@@ -1011,15 +1011,18 @@ class DJRankApp {
 
         // Create video with click to expand
         const wrapper = document.createElement("div");
-        wrapper.className = "media-item";
+        wrapper.className = "media-item video-item";
         wrapper.innerHTML = `
-          <video src="${url}" controls></video>
+          <video src="${url}" preload="metadata"></video>
+          <div class="video-play-overlay">▶</div>
           <button class="remove-media-btn" title="Remove">×</button>
         `;
 
         // Click to expand
-        wrapper.querySelector("video").addEventListener("click", () => {
-          this.expandMedia(url, "video");
+        wrapper.addEventListener("click", (e) => {
+          if (!e.target.classList.contains("remove-media-btn")) {
+            this.expandMedia(url, "video");
+          }
         });
 
         // Remove button
@@ -1089,15 +1092,18 @@ class DJRankApp {
     if (dj.videos && dj.videos.length > 0) {
       dj.videos.forEach((url) => {
         const wrapper = document.createElement("div");
-        wrapper.className = "media-item";
+        wrapper.className = "media-item video-item";
         wrapper.innerHTML = `
-          <video src="${url}" controls></video>
+          <video src="${url}" preload="metadata"></video>
+          <div class="video-play-overlay">▶</div>
           <button class="remove-media-btn" title="Remove">×</button>
         `;
 
         // Click to expand
-        wrapper.querySelector("video").addEventListener("click", () => {
-          this.expandMedia(url, "video");
+        wrapper.addEventListener("click", (e) => {
+          if (!e.target.classList.contains("remove-media-btn")) {
+            this.expandMedia(url, "video");
+          }
         });
 
         // Remove button (admin only)
