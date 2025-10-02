@@ -465,25 +465,25 @@ AND column_name LIKE 'bonus_%' OR column_name LIKE 'penalty_%' OR column_name LI
 
 ```javascript
 function getTierFromScore(score) {
-  if (score >= 13.5) return "S";
-  if (score >= 11.5) return "A";
-  if (score >= 9.5) return "B";
-  if (score >= 7.5) return "C";
-  if (score >= 5.5) return "D";
-  if (score >= 3.5) return "E";
+  if (score >= 13.0) return "S"; // Perfect core + net bonus = S tier
+  if (score >= 11.0) return "A";
+  if (score >= 9.0) return "B";
+  if (score >= 7.0) return "C";
+  if (score >= 5.0) return "D";
+  if (score >= 3.0) return "E";
   return "F";
 }
 ```
 
 | Tier | Score Range | Label         |
 | ---- | ----------- | ------------- |
-| S    | 13.5-15.0   | Legendary     |
-| A    | 11.5-13.0   | Elite         |
-| B    | 9.5-11.0    | Very Strong   |
-| C    | 7.5-9.0     | Good          |
-| D    | 5.5-7.0     | Average       |
-| E    | 3.5-5.0     | Below Average |
-| F    | 0.0-3.0     | Poor          |
+| S    | 13.0-15.0   | Legendary     |
+| A    | 11.0-12.9   | Elite         |
+| B    | 9.0-10.9    | Very Strong   |
+| C    | 7.0-8.9     | Good          |
+| D    | 5.0-6.9     | Average       |
+| E    | 3.0-4.9     | Below Average |
+| F    | 0.0-2.9     | Poor          |
 
 ---
 

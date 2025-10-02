@@ -239,6 +239,187 @@ class DJRankApp {
           this.exitDeleteMode();
         }
       });
+
+    // City dropdown change - update venue dropdown
+    document.getElementById("eventCity").addEventListener("change", (e) => {
+      this.populateVenueDropdown(e.target.value);
+    });
+
+    // Venue dropdown - warn if no city selected
+    document.getElementById("eventVenue").addEventListener("focus", (e) => {
+      const citySelect = document.getElementById("eventCity");
+      if (!citySelect.value) {
+        e.target.blur();
+        alert("⚠️ Please select a city first");
+      }
+    });
+
+    // Bonus/penalty checkboxes - update score in real-time
+    const bonusPenaltyCheckboxes = [
+      "bonusCrowdControl",
+      "bonusSignatureMoment",
+      "bonusBoldRisks",
+      "penaltyCliches",
+      "penaltyOverreliance",
+      "penaltyPoorEnergy",
+    ];
+
+    bonusPenaltyCheckboxes.forEach((id) => {
+      document.getElementById(id).addEventListener("change", () => {
+        this.updateTotalScore();
+      });
+    });
+
+    // Collapsible sections
+    document.querySelectorAll(".collapsible-header").forEach((header) => {
+      header.addEventListener("click", (e) => {
+        const section = e.target.closest(".collapsible-section");
+        section.classList.toggle("collapsed");
+      });
+    });
+
+    // Criteria labels - hover for desktop, click for mobile (using event delegation)
+    const isMobile = window.matchMedia("(max-width: 1200px)").matches;
+
+    if (!isMobile) {
+      // Desktop: hover behavior
+      document.addEventListener("mouseover", (e) => {
+        if (e.target.classList.contains("criteria-label")) {
+          const type = e.target.dataset.info;
+          this.showCriteriaTooltip(type);
+        }
+      });
+
+      document.addEventListener("mouseout", (e) => {
+        if (e.target.classList.contains("criteria-label")) {
+          // Check if we're not moving to the tooltip itself
+          const tooltip = document.getElementById("criteriaTooltip");
+          if (!tooltip.contains(e.relatedTarget)) {
+            this.hideCriteriaTooltip();
+          }
+        }
+      });
+
+      // Keep tooltip open when hovering over it
+      document.addEventListener("mouseover", (e) => {
+        const tooltip = document.getElementById("criteriaTooltip");
+        if (tooltip && tooltip.contains(e.target)) {
+          tooltip.classList.add("active");
+        }
+      });
+
+      document.addEventListener("mouseout", (e) => {
+        const tooltip = document.getElementById("criteriaTooltip");
+        if (
+          tooltip &&
+          tooltip.contains(e.target) &&
+          !tooltip.contains(e.relatedTarget)
+        ) {
+          const criteriaRanking = document.querySelector(".criteria-ranking");
+          if (!criteriaRanking.contains(e.relatedTarget)) {
+            this.hideCriteriaTooltip();
+          }
+        }
+      });
+    } else {
+      // Mobile: click/tap behavior
+      document.addEventListener("click", (e) => {
+        if (e.target.classList.contains("criteria-label")) {
+          e.preventDefault();
+          e.stopPropagation();
+          const type = e.target.dataset.info;
+          this.toggleCriteriaTooltip(type);
+          return;
+        }
+
+        // Close tooltip when clicking outside
+        const tooltip = document.getElementById("criteriaTooltip");
+        if (tooltip && tooltip.classList.contains("active")) {
+          this.hideCriteriaTooltip();
+        }
+      });
+    }
+  }
+
+  toggleCriteriaTooltip(type) {
+    const tooltip = document.getElementById("criteriaTooltip");
+    const currentType = tooltip.dataset.currentType;
+
+    // If clicking the same label, close it
+    if (tooltip.classList.contains("active") && currentType === type) {
+      this.hideCriteriaTooltip();
+      return;
+    }
+
+    // Show tooltip with new content
+    this.showCriteriaTooltip(type);
+  }
+
+  showCriteriaTooltip(type) {
+    const infoData = {
+      flow: {
+        title: "Flow — Set Progression & Transitions",
+        levels: [
+          "0 — Choppy, no cohesion",
+          "1 — Basic mixing, some awkward transitions",
+          "2 — Smooth transitions, good pacing",
+          "3 — Masterful journey, flawless energy management",
+        ],
+      },
+      vibes: {
+        title: "Vibes — Energy & Crowd Connection",
+        levels: [
+          "0 — Crowd disconnected, low energy",
+          "1 — Some energy, occasional connection",
+          "2 — Good energy, crowd engaged",
+          "3 — Electric atmosphere, crowd fully immersed",
+        ],
+      },
+      visuals: {
+        title: "Visuals — Stage Presence & Production",
+        levels: [
+          "0 — No stage presence or visuals",
+          "1 — Basic presence, minimal visuals",
+          "2 — Strong presence, good visual elements",
+          "3 — Commanding presence, stunning production",
+        ],
+      },
+      creativity: {
+        title: "Creativity — Track Selection & Originality",
+        levels: [
+          "0 — Generic, predictable set",
+          "1 — Some unique choices, mostly safe",
+          "2 — Creative selections, good variety",
+          "3 — Bold, unique, memorable track choices",
+        ],
+      },
+    };
+
+    const info = infoData[type];
+    if (!info) return;
+
+    const tooltip = document.getElementById("criteriaTooltip");
+    const tooltipTitle = document.getElementById("tooltipTitle");
+    const tooltipBody = document.getElementById("tooltipBody");
+
+    if (!tooltip || !tooltipTitle || !tooltipBody) return;
+
+    tooltipTitle.textContent = info.title;
+
+    const bodyHTML = info.levels
+      .map((level) => `<div class="rating-level">${level}</div>`)
+      .join("");
+
+    tooltipBody.innerHTML = bodyHTML;
+
+    tooltip.dataset.currentType = type;
+    tooltip.classList.add("active");
+  }
+
+  hideCriteriaTooltip() {
+    const tooltip = document.getElementById("criteriaTooltip");
+    tooltip.classList.remove("active");
+    tooltip.dataset.currentType = "";
   }
 
   enterDeleteMode() {
@@ -269,6 +450,7 @@ class DJRankApp {
     const modal = document.getElementById(modalId);
     if (modal) {
       modal.classList.add("active");
+      document.body.classList.add("modal-open");
     }
   }
 
@@ -282,6 +464,15 @@ class DJRankApp {
       });
 
       modal.classList.remove("active");
+
+      // Only remove modal-open if no other modals are active
+      const anyModalActive = document.querySelector(".modal.active");
+      if (!anyModalActive) {
+        document.body.classList.remove("modal-open");
+      }
+
+      // Hide tooltip when closing modal
+      this.hideCriteriaTooltip();
     }
   }
 
@@ -453,7 +644,7 @@ class DJRankApp {
         soundcloud_url: artist.source === "soundcloud" ? artist.url : "",
         spotify_url: artist.source === "spotify" ? artist.url : "",
         tier: null,
-        criteria: { flow: 0, vibes: 0, visuals: 0, guests: 0 },
+        criteria: { flow: 0, vibes: 0, visuals: 0, creativity: 0 },
         notes: "",
         photos: [],
         videos: [],
@@ -651,25 +842,24 @@ class DJRankApp {
       flow: 0,
       vibes: 0,
       visuals: 0,
-      guests: 0,
+      creativity: 0,
     };
 
-    // Calculate total
-    const total =
-      criteria.flow + criteria.vibes + criteria.visuals + criteria.guests;
+    // Calculate scores (new academic system)
+    const coreScore =
+      criteria.flow + criteria.vibes + criteria.visuals + criteria.creativity;
 
-    // Determine tier from score
-    const getTierFromScore = (score) => {
-      if (score >= 11) return "S";
-      if (score >= 9) return "A";
-      if (score >= 7) return "B";
-      if (score >= 5) return "C";
-      if (score >= 3) return "D";
-      if (score >= 1) return "E";
-      return "F";
-    };
+    const bonusScore =
+      (dj.bonus_crowd_control ? 0.5 : 0) +
+      (dj.bonus_signature_moment ? 0.5 : 0) +
+      (dj.bonus_bold_risks ? 0.5 : 0);
 
-    const suggestedTier = getTierFromScore(total);
+    const penaltyScore =
+      (dj.penalty_cliche_tracks ? -0.5 : 0) +
+      (dj.penalty_overreliance ? -0.5 : 0) +
+      (dj.penalty_poor_energy ? -0.5 : 0);
+
+    const totalScore = coreScore + bonusScore + penaltyScore;
 
     // Generate star rating
     const getStars = (value) => {
@@ -680,13 +870,65 @@ class DJRankApp {
 
     // Get rating description
     const getDescription = (value) => {
-      if (value === 3) return "Excellent";
-      if (value === 2) return "Good";
-      if (value === 1) return "Below Average";
+      if (value === 3) return "Masterful";
+      if (value === 2) return "Proficient";
+      if (value === 1) return "Developing";
       return "Not Rated";
     };
 
+    // Event context display
+    const eventInfo = [];
+    if (dj.event_venue) eventInfo.push(dj.event_venue);
+    if (dj.event_city) eventInfo.push(dj.event_city);
+    const eventLocation = eventInfo.join(", ");
+
+    const eventDate = dj.event_date
+      ? new Date(dj.event_date).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        })
+      : "";
+
+    const eventDetails = [];
+    if (dj.event_type) eventDetails.push(dj.event_type);
+    if (dj.event_slot) eventDetails.push(dj.event_slot);
+    if (dj.set_duration) eventDetails.push(dj.set_duration);
+    const eventDetailsStr = eventDetails.join(" • ");
+
+    const suggestedTier = this.getTierFromScore(totalScore);
+
     container.innerHTML = `
+      ${
+        eventLocation || eventDate || eventDetailsStr
+          ? `
+        <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--glass-border);">
+          <h4 style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">📍 SEEN AT</h4>
+          ${
+            eventLocation
+              ? `<div style="font-size: 1rem; margin-bottom: 0.25rem;">${eventLocation}</div>`
+              : ""
+          }
+          ${
+            eventDate
+              ? `<div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.25rem;">${eventDate}</div>`
+              : ""
+          }
+          ${
+            eventDetailsStr
+              ? `<div style="color: var(--text-secondary); font-size: 0.85rem;">${eventDetailsStr}</div>`
+              : ""
+          }
+        </div>
+      `
+          : ""
+      }
+      
+      <h4 style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">📊 RANKING BREAKDOWN</h4>
+      
+      <div style="margin-bottom: 1rem;">
+        <strong style="color: var(--text-primary);">Core Skills:</strong>
+      </div>
       <div class="breakdown-item">
         <span class="breakdown-label">Flow:</span>
         <span class="breakdown-stars">${getStars(criteria.flow)}</span>
@@ -706,14 +948,94 @@ class DJRankApp {
         <span class="breakdown-desc">${getDescription(criteria.visuals)}</span>
       </div>
       <div class="breakdown-item">
-        <span class="breakdown-label">Guests:</span>
-        <span class="breakdown-stars">${getStars(criteria.guests)}</span>
-        <span class="breakdown-score">(${criteria.guests}/3)</span>
-        <span class="breakdown-desc">${getDescription(criteria.guests)}</span>
+        <span class="breakdown-label">Creativity:</span>
+        <span class="breakdown-stars">${getStars(criteria.creativity)}</span>
+        <span class="breakdown-score">(${criteria.creativity}/3)</span>
+        <span class="breakdown-desc">${getDescription(
+          criteria.creativity
+        )}</span>
       </div>
-      <div class="breakdown-total">
-        <strong>Total: ${total}/12</strong>
-        <span class="breakdown-tier">→ Tier ${suggestedTier}</span>
+      <div style="padding: 0.5rem 0; border-top: 1px solid var(--glass-border); margin-top: 0.5rem;">
+        <strong style="color: var(--text-primary);">Core Total: ${coreScore}/12</strong>
+      </div>
+      
+      ${
+        bonusScore > 0 || penaltyScore < 0
+          ? `
+        <div style="margin-top: 1rem;">
+          <strong style="color: var(--text-primary);">Performance Modifiers:</strong>
+        </div>
+      `
+          : ""
+      }
+      
+      ${
+        bonusScore > 0
+          ? `
+        <div style="margin-top: 0.75rem;">
+          <div style="color: #4ade80; font-size: 0.9rem; margin-bottom: 0.5rem;">⭐ Bonuses:</div>
+          ${
+            dj.bonus_crowd_control
+              ? '<div style="padding-left: 1rem; color: var(--text-secondary); font-size: 0.85rem;">✓ Exceptional Crowd Control (+0.5)</div>'
+              : ""
+          }
+          ${
+            dj.bonus_signature_moment
+              ? '<div style="padding-left: 1rem; color: var(--text-secondary); font-size: 0.85rem;">✓ Signature Moment (+0.5)</div>'
+              : ""
+          }
+          ${
+            dj.bonus_bold_risks
+              ? '<div style="padding-left: 1rem; color: var(--text-secondary); font-size: 0.85rem;">✓ Bold Risk-Taking (+0.5)</div>'
+              : ""
+          }
+          <div style="padding: 0.5rem 0; padding-left: 1rem;">
+            <strong style="color: #4ade80;">Bonus Total: +${bonusScore.toFixed(
+              1
+            )}</strong>
+          </div>
+        </div>
+      `
+          : ""
+      }
+      
+      ${
+        penaltyScore < 0
+          ? `
+        <div style="margin-top: 0.75rem;">
+          <div style="color: #f87171; font-size: 0.9rem; margin-bottom: 0.5rem;">⚠️ Penalties:</div>
+          ${
+            dj.penalty_cliche_tracks
+              ? '<div style="padding-left: 1rem; color: var(--text-secondary); font-size: 0.85rem;">✓ Cliché Tracks (-0.5)</div>'
+              : ""
+          }
+          ${
+            dj.penalty_overreliance
+              ? '<div style="padding-left: 1rem; color: var(--text-secondary); font-size: 0.85rem;">✓ Over-Reliance on Hits (-0.5)</div>'
+              : ""
+          }
+          ${
+            dj.penalty_poor_energy
+              ? '<div style="padding-left: 1rem; color: var(--text-secondary); font-size: 0.85rem;">✓ Poor Energy Management (-0.5)</div>'
+              : ""
+          }
+          <div style="padding: 0.5rem 0; padding-left: 1rem;">
+            <strong style="color: #f87171;">Penalty Total: ${penaltyScore.toFixed(
+              1
+            )}</strong>
+          </div>
+        </div>
+      `
+          : ""
+      }
+      
+      <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid var(--accent-primary);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <strong style="font-size: 1.1rem; color: var(--accent-primary);">FINAL SCORE: ${totalScore.toFixed(
+            1
+          )}/15</strong>
+          <span style="color: var(--text-secondary);">→ Tier <strong style="color: var(--accent-primary); font-size: 1.2rem;">${suggestedTier}</strong></span>
+        </div>
       </div>
     `;
   }
@@ -799,12 +1121,38 @@ class DJRankApp {
       flow: 0,
       vibes: 0,
       visuals: 0,
-      guests: 0,
+      creativity: 0,
     };
     this.setCriteriaRating("flow", criteria.flow);
     this.setCriteriaRating("vibes", criteria.vibes);
     this.setCriteriaRating("visuals", criteria.visuals);
-    this.setCriteriaRating("guests", criteria.guests);
+    this.setCriteriaRating("creativity", criteria.creativity);
+
+    // Set bonus checkboxes
+    document.getElementById("bonusCrowdControl").checked =
+      dj.bonus_crowd_control || false;
+    document.getElementById("bonusSignatureMoment").checked =
+      dj.bonus_signature_moment || false;
+    document.getElementById("bonusBoldRisks").checked =
+      dj.bonus_bold_risks || false;
+
+    // Set penalty checkboxes
+    document.getElementById("penaltyCliches").checked =
+      dj.penalty_cliche_tracks || false;
+    document.getElementById("penaltyOverreliance").checked =
+      dj.penalty_overreliance || false;
+    document.getElementById("penaltyPoorEnergy").checked =
+      dj.penalty_poor_energy || false;
+
+    // Set event context fields
+    document.getElementById("eventCity").value = dj.event_city || "";
+    document.getElementById("eventDate").value = dj.event_date || "";
+    document.getElementById("eventType").value = dj.event_type || "";
+    document.getElementById("eventSlot").value = dj.event_slot || "";
+    document.getElementById("setDuration").value = dj.set_duration || "";
+
+    // Update venue dropdown based on selected city (this also handles disabling if no city)
+    this.populateVenueDropdown(dj.event_city || "");
 
     this.updateTotalScore();
 
@@ -855,25 +1203,105 @@ class DJRankApp {
   }
 
   updateTotalScore() {
+    // Core skills (0-12)
     const flow = parseInt(document.getElementById("flowRating").value) || 0;
     const vibes = parseInt(document.getElementById("vibesRating").value) || 0;
     const visuals =
       parseInt(document.getElementById("visualsRating").value) || 0;
-    const guests = parseInt(document.getElementById("guestsRating").value) || 0;
+    const creativity =
+      parseInt(document.getElementById("creativityRating").value) || 0;
 
-    const total = flow + vibes + visuals + guests;
-    document.getElementById("totalScore").textContent = total;
+    const coreScore = flow + vibes + visuals + creativity;
 
-    // Calculate suggested tier (0-12 points)
-    let tier = "F";
-    if (total >= 11) tier = "S";
-    else if (total >= 9) tier = "A";
-    else if (total >= 7) tier = "B";
-    else if (total >= 5) tier = "C";
-    else if (total >= 3) tier = "D";
-    else if (total >= 1) tier = "E";
+    // Bonuses (0-1.5)
+    const bonusCrowdControl = document.getElementById("bonusCrowdControl")
+      .checked
+      ? 0.5
+      : 0;
+    const bonusSignatureMoment = document.getElementById("bonusSignatureMoment")
+      .checked
+      ? 0.5
+      : 0;
+    const bonusBoldRisks = document.getElementById("bonusBoldRisks").checked
+      ? 0.5
+      : 0;
+    const bonusScore =
+      bonusCrowdControl + bonusSignatureMoment + bonusBoldRisks;
 
+    // Penalties (0 to -1.5)
+    const penaltyCliches = document.getElementById("penaltyCliches").checked
+      ? -0.5
+      : 0;
+    const penaltyOverreliance = document.getElementById("penaltyOverreliance")
+      .checked
+      ? -0.5
+      : 0;
+    const penaltyPoorEnergy = document.getElementById("penaltyPoorEnergy")
+      .checked
+      ? -0.5
+      : 0;
+    const penaltyScore =
+      penaltyCliches + penaltyOverreliance + penaltyPoorEnergy;
+
+    // Final score (0-15)
+    const totalScore = coreScore + bonusScore + penaltyScore;
+
+    // Update display
+    document.getElementById("totalScore").textContent = coreScore; // Core Score at top
+    document.getElementById("finalCoreScore").textContent = coreScore;
+    document.getElementById("finalBonusScore").textContent =
+      bonusScore.toFixed(1);
+    document.getElementById("finalPenaltyScore").textContent =
+      penaltyScore.toFixed(1);
+    document.getElementById("finalTotalScore").textContent =
+      totalScore.toFixed(1);
+    document.getElementById("bonusScore").textContent = bonusScore.toFixed(1);
+    document.getElementById("penaltyScore").textContent =
+      penaltyScore.toFixed(1);
+
+    // Calculate suggested tier (0-15 points)
+    const tier = this.getTierFromScore(totalScore);
     document.getElementById("suggestedTier").textContent = tier;
+  }
+
+  getTierFromScore(score) {
+    if (score >= 13.0) return "S"; // Perfect core + net bonus = S tier
+    if (score >= 11.0) return "A";
+    if (score >= 9.0) return "B";
+    if (score >= 7.0) return "C";
+    if (score >= 5.0) return "D";
+    if (score >= 3.0) return "E";
+    return "F";
+  }
+
+  populateVenueDropdown(selectedCity = "") {
+    const venueSelect = document.getElementById("eventVenue");
+    const citySelect = document.getElementById("eventCity");
+    const city = selectedCity || citySelect.value;
+
+    // Clear existing options
+    if (!city) {
+      venueSelect.innerHTML = '<option value="">Select city first</option>';
+      venueSelect.disabled = true;
+      return;
+    }
+
+    venueSelect.disabled = false;
+    venueSelect.innerHTML = '<option value="">Select Venue</option>';
+
+    if (VENUE_DATA[city]) {
+      VENUE_DATA[city].forEach((venue) => {
+        const option = document.createElement("option");
+        option.value = venue;
+        option.textContent = venue;
+        venueSelect.appendChild(option);
+      });
+    }
+
+    // Restore selected venue if updating existing DJ
+    if (this.currentDJ && this.currentDJ.event_venue) {
+      venueSelect.value = this.currentDJ.event_venue;
+    }
   }
 
   async applyCalculatedTier() {
@@ -900,8 +1328,27 @@ class DJRankApp {
         flow: parseInt(document.getElementById("flowRating").value) || 0,
         vibes: parseInt(document.getElementById("vibesRating").value) || 0,
         visuals: parseInt(document.getElementById("visualsRating").value) || 0,
-        guests: parseInt(document.getElementById("guestsRating").value) || 0,
+        creativity:
+          parseInt(document.getElementById("creativityRating").value) || 0,
       },
+      // Performance bonuses
+      bonus_crowd_control: document.getElementById("bonusCrowdControl").checked,
+      bonus_signature_moment: document.getElementById("bonusSignatureMoment")
+        .checked,
+      bonus_bold_risks: document.getElementById("bonusBoldRisks").checked,
+      // Performance penalties
+      penalty_cliche_tracks: document.getElementById("penaltyCliches").checked,
+      penalty_overreliance: document.getElementById("penaltyOverreliance")
+        .checked,
+      penalty_poor_energy: document.getElementById("penaltyPoorEnergy").checked,
+      // Event context
+      event_city: document.getElementById("eventCity").value,
+      event_venue: document.getElementById("eventVenue").value,
+      event_date: document.getElementById("eventDate").value,
+      event_type: document.getElementById("eventType").value,
+      event_slot: document.getElementById("eventSlot").value,
+      set_duration: document.getElementById("setDuration").value,
+      // Media
       photos: this.currentDJ.photos || [],
       videos: this.currentDJ.videos || [],
     };

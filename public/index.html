@@ -172,6 +172,97 @@
                 </div>
               </div>
 
+              <!-- Event Context (Admin + Public View) -->
+              <div class="event-context">
+                <h3>Event Context</h3>
+                <div class="event-grid">
+                  <div class="event-field">
+                    <label for="eventCity">City</label>
+                    <select class="glass-input" id="eventCity">
+                      <option value="">Select City</option>
+                      <option value="Las Vegas, NV">Las Vegas, NV</option>
+                      <option value="Los Angeles, CA">Los Angeles, CA</option>
+                      <option value="Miami, FL">Miami, FL</option>
+                      <option value="New York, NY">New York, NY</option>
+                      <option value="Portland, OR">Portland, OR</option>
+                      <option value="Festival/Other">Festival/Other</option>
+                    </select>
+                  </div>
+                  <div class="event-field">
+                    <label for="eventVenue">Venue</label>
+                    <select class="glass-input" id="eventVenue">
+                      <option value="">Select Venue</option>
+                    </select>
+                  </div>
+                  <div class="event-field">
+                    <label for="eventDate">Date</label>
+                    <input type="date" class="glass-input" id="eventDate" />
+                  </div>
+                  <div class="event-field">
+                    <label for="eventType">Event Type</label>
+                    <select class="glass-input" id="eventType">
+                      <option value="">Select Type</option>
+                      <option value="Club Residency">Club Residency</option>
+                      <option value="One-Off Show">One-Off Show</option>
+                      <option value="Festival Main Stage">
+                        Festival Main Stage
+                      </option>
+                      <option value="Festival Side Stage">
+                        Festival Side Stage
+                      </option>
+                      <option value="Pool Party / Day Club">
+                        Pool Party / Day Club
+                      </option>
+                      <option value="Underground / Warehouse">
+                        Underground / Warehouse
+                      </option>
+                      <option value="Rooftop / Open Air">
+                        Rooftop / Open Air
+                      </option>
+                      <option value="Private Event">Private Event</option>
+                      <option value="Back-to-Back Set">Back-to-Back Set</option>
+                      <option value="Extended Set (3+ hours)">
+                        Extended Set (3+ hours)
+                      </option>
+                    </select>
+                  </div>
+                  <div class="event-field">
+                    <label for="eventSlot">Set Slot</label>
+                    <select class="glass-input" id="eventSlot">
+                      <option value="">Select Slot</option>
+                      <option value="Opening (First 2 hours)">
+                        Opening (First 2 hours)
+                      </option>
+                      <option value="Early Prime (10PM-12AM)">
+                        Early Prime (10PM-12AM)
+                      </option>
+                      <option value="Peak Prime (12AM-2AM)">
+                        Peak Prime (12AM-2AM)
+                      </option>
+                      <option value="Late Night (2AM-4AM)">
+                        Late Night (2AM-4AM)
+                      </option>
+                      <option value="Closing Set">Closing Set</option>
+                      <option value="All Night Long">All Night Long</option>
+                    </select>
+                  </div>
+                  <div class="event-field">
+                    <label for="setDuration">Set Duration</label>
+                    <select class="glass-input" id="setDuration">
+                      <option value="">Select Duration</option>
+                      <option value="1 hour">1 hour</option>
+                      <option value="1.5 hours">1.5 hours</option>
+                      <option value="2 hours">2 hours</option>
+                      <option value="2.5 hours">2.5 hours</option>
+                      <option value="3 hours">3 hours</option>
+                      <option value="3.5 hours">3.5 hours</option>
+                      <option value="4 hours">4 hours</option>
+                      <option value="4+ hours">4+ hours</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
               <!-- Criteria Breakdown (Public View) -->
               <div class="criteria-breakdown" id="criteriaBreakdown">
                 <h3>📊 Ranking Breakdown</h3>
@@ -179,9 +270,9 @@
               </div>
 
               <div class="criteria-ranking">
-                <h3>Criteria Ranking (0-3 points each)</h3>
+                <h3>Core Skills (0-3 points each)</h3>
                 <div class="criteria-item">
-                  <label>Flow</label>
+                  <label class="criteria-label" data-info="flow">Flow</label>
                   <div class="rating-dots">
                     <span class="dot" data-value="0"></span>
                     <span class="dot" data-value="1"></span>
@@ -191,7 +282,7 @@
                   <input type="hidden" id="flowRating" value="0" />
                 </div>
                 <div class="criteria-item">
-                  <label>Vibes</label>
+                  <label class="criteria-label" data-info="vibes">Vibes</label>
                   <div class="rating-dots">
                     <span class="dot" data-value="0"></span>
                     <span class="dot" data-value="1"></span>
@@ -201,7 +292,9 @@
                   <input type="hidden" id="vibesRating" value="0" />
                 </div>
                 <div class="criteria-item">
-                  <label>Visuals</label>
+                  <label class="criteria-label" data-info="visuals"
+                    >Visuals</label
+                  >
                   <div class="rating-dots">
                     <span class="dot" data-value="0"></span>
                     <span class="dot" data-value="1"></span>
@@ -211,20 +304,92 @@
                   <input type="hidden" id="visualsRating" value="0" />
                 </div>
                 <div class="criteria-item">
-                  <label>Guests</label>
+                  <label class="criteria-label" data-info="creativity"
+                    >Creativity</label
+                  >
                   <div class="rating-dots">
                     <span class="dot" data-value="0"></span>
                     <span class="dot" data-value="1"></span>
                     <span class="dot" data-value="2"></span>
                     <span class="dot" data-value="3"></span>
                   </div>
-                  <input type="hidden" id="guestsRating" value="0" />
+                  <input type="hidden" id="creativityRating" value="0" />
                 </div>
                 <div class="total-score">
-                  <strong>Total Score:</strong>
+                  <strong>Core Score:</strong>
                   <span id="totalScore">0</span>/12
+                </div>
+
+                <!-- Criteria Info Tooltip -->
+                <div class="criteria-tooltip" id="criteriaTooltip">
+                  <div class="criteria-tooltip-content">
+                    <h4 id="tooltipTitle"></h4>
+                    <div id="tooltipBody"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Performance Bonuses (Admin Only) -->
+              <div class="performance-bonuses collapsible-section collapsed">
+                <h3 class="collapsible-header">
+                  Performance Bonuses (+0.5 each)
+                  <span class="toggle-icon">▼</span>
+                </h3>
+                <div class="bonus-checkboxes collapsible-content">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="bonusCrowdControl" />
+                    <span>Exceptional Crowd Control</span>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="bonusSignatureMoment" />
+                    <span>Signature Moment</span>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="bonusBoldRisks" />
+                    <span>Bold Risk-Taking</span>
+                  </label>
+                </div>
+                <div class="bonus-total">
+                  <strong>Bonus:</strong> +<span id="bonusScore">0</span>
+                </div>
+              </div>
+
+              <!-- Performance Penalties (Admin Only) -->
+              <div class="performance-penalties collapsible-section collapsed">
+                <h3 class="collapsible-header">
+                  Performance Penalties (-0.5 each)
+                  <span class="toggle-icon">▼</span>
+                </h3>
+                <div class="penalty-checkboxes collapsible-content">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="penaltyCliches" />
+                    <span>Cliché Tracks</span>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="penaltyOverreliance" />
+                    <span>Over-Reliance on Hits</span>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="penaltyPoorEnergy" />
+                    <span>Poor Energy Management</span>
+                  </label>
+                </div>
+                <div class="penalty-total">
+                  <strong>Penalty:</strong> <span id="penaltyScore">0</span>
+                </div>
+              </div>
+
+              <!-- Final Score -->
+              <div class="final-score">
+                <div class="score-breakdown">
+                  <div>Core: <span id="finalCoreScore">0</span>/12</div>
+                  <div>Bonus: +<span id="finalBonusScore">0</span></div>
+                  <div>Penalty: <span id="finalPenaltyScore">0</span></div>
+                </div>
+                <div class="total-final">
+                  <strong>TOTAL:</strong> <span id="finalTotalScore">0</span>/15
                   <span class="suggested-tier"
-                    >Suggested Tier: <strong id="suggestedTier">F</strong></span
+                    >→ Tier <strong id="suggestedTier">F</strong></span
                   >
                 </div>
                 <button class="glass-btn primary" id="applyTierBtn">
@@ -297,6 +462,7 @@
     <script src="config.js"></script>
     <script src="storage.js"></script>
     <script src="api-service.js"></script>
+    <script src="venue-data.js"></script>
     <script src="drag-drop.js"></script>
     <script src="app.js"></script>
   </body>

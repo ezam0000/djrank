@@ -50,7 +50,18 @@ alwaysApply: true
 - Separate concerns into appropriate files
 - Use appropriate storage solutions (localStorage → cloud when needed)
 - Follow mobile-first design principles
-- Maintain glassmorphism/liquid glass design language
+- **CRITICAL: Maintain glassmorphism/liquid glass design language**
+
+## Design Language (CRITICAL)
+
+- **Glassmorphism/Liquid Glass:** All UI elements use glass effects with backdrop blur
+- **Minimalist & Professional:** No emojis, no unnecessary decorations, no visual clutter
+- **Elegant & Clean:** Every element serves a purpose, nothing added "just in case"
+- **Dark Mode:** Professional dark theme with subtle accents
+- **Typography:** Clear, readable fonts - never too small (minimum 0.9rem on desktop, 0.85rem mobile)
+- **Spacing:** Generous padding and margins for breathing room
+- **Mobile-First:** All features must work perfectly on mobile with touch interactions
+- **Non-Invasive UI:** Tooltips, modals, and overlays should be contextual and not block the main workflow
 
 ## Planning
 

@@ -48,17 +48,48 @@ module.exports = async (req, res) => {
         notes,
         photos,
         videos,
+        // Bonus fields
+        bonus_crowd_control,
+        bonus_signature_moment,
+        bonus_bold_risks,
+        // Penalty fields
+        penalty_cliche_tracks,
+        penalty_overreliance,
+        penalty_poor_energy,
+        // Event context
+        event_venue,
+        event_city,
+        event_date,
+        event_type,
+        event_slot,
+        set_duration,
       } = req.body;
 
       const result = await sql`
-        INSERT INTO djs (id, name, bio, image, soundcloud_url, spotify_url, apple_music_url, tier, criteria, notes, photos, videos)
-        VALUES (${id}, ${name}, ${bio || null}, ${image || null}, ${
-        soundcloud_url || null
-      }, ${spotify_url || null}, ${apple_music_url || null}, ${
-        tier || null
-      }, ${JSON.stringify(criteria || {})}, ${notes || null}, ${
-        photos || []
-      }, ${videos || []})
+        INSERT INTO djs (
+          id, name, bio, image, 
+          soundcloud_url, spotify_url, apple_music_url, 
+          tier, criteria, notes, photos, videos,
+          bonus_crowd_control, bonus_signature_moment, bonus_bold_risks,
+          penalty_cliche_tracks, penalty_overreliance, penalty_poor_energy,
+          event_venue, event_city, event_date, event_type, event_slot, set_duration
+        )
+        VALUES (
+          ${id}, ${name}, ${bio || null}, ${image || null}, 
+          ${soundcloud_url || null}, ${spotify_url || null}, ${
+        apple_music_url || null
+      }, 
+          ${tier || null}, ${JSON.stringify(criteria || {})}, ${notes || null}, 
+          ${photos || []}, ${videos || []},
+          ${bonus_crowd_control || false}, ${
+        bonus_signature_moment || false
+      }, ${bonus_bold_risks || false},
+          ${penalty_cliche_tracks || false}, ${
+        penalty_overreliance || false
+      }, ${penalty_poor_energy || false},
+          ${event_venue || null}, ${event_city || null}, ${event_date || null}, 
+          ${event_type || null}, ${event_slot || null}, ${set_duration || null}
+        )
         RETURNING *
       `;
 
@@ -78,13 +109,18 @@ module.exports = async (req, res) => {
       Object.keys(updates).forEach((key) => {
         if (key !== "id") {
           fields.push(`${key} = $${paramCount}`);
-          // Handle JSONB and array fields
+          // Handle different field types
           if (key === "criteria") {
+            // JSONB field - stringify
             values.push(JSON.stringify(updates[key]));
           } else if (key === "photos" || key === "videos") {
             // TEXT[] arrays - pass as-is (Postgres will handle)
             values.push(updates[key] || []);
+          } else if (key.startsWith("bonus_") || key.startsWith("penalty_")) {
+            // Boolean fields - ensure boolean type
+            values.push(Boolean(updates[key]));
           } else {
+            // All other fields (text, date, etc.)
             values.push(updates[key]);
           }
           paramCount++;

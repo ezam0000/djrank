@@ -104,8 +104,26 @@ body::before {
 .upload-btn,
 #musicInputs,
 .remove-btn,
-.remove-media-btn {
+.remove-media-btn,
+.performance-bonuses,
+.performance-penalties,
+.final-score {
   display: none !important;
+}
+
+/* Hide public-only elements by default */
+.criteria-breakdown {
+  display: none !important;
+}
+
+/* Hide tooltip in public mode */
+body:not(.admin-mode) .criteria-tooltip {
+  display: none !important;
+}
+
+/* Show tooltip in admin mode */
+body.admin-mode .criteria-tooltip {
+  display: block !important;
 }
 
 /* Show admin-only elements when authenticated */
@@ -127,6 +145,17 @@ body::before {
 
 .admin-mode .remove-btn,
 .admin-mode .remove-media-btn {
+  display: block !important;
+}
+
+.admin-mode .performance-bonuses,
+.admin-mode .performance-penalties,
+.admin-mode .final-score {
+  display: block !important;
+}
+
+/* Show breakdown only in public view (NOT admin mode) */
+body:not(.admin-mode) .criteria-breakdown {
   display: block !important;
 }
 
@@ -727,10 +756,16 @@ body::before {
   align-items: center;
   justify-content: center;
   padding: 2rem;
+  overflow-y: auto;
 }
 
 .modal.active {
   display: flex;
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+  overflow: hidden;
 }
 
 .modal-content {
@@ -1055,6 +1090,15 @@ body::before {
     padding: 0.85rem 1rem;
     font-size: 0.9rem;
   }
+
+  .event-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .score-breakdown {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 }
 
 /* ===== CRITERIA RANKING ===== */
@@ -1063,6 +1107,7 @@ body::before {
   border: 1px solid var(--glass-border);
   border-radius: 16px;
   padding: 1.5rem;
+  position: relative;
 }
 
 .criteria-item {
@@ -1125,6 +1170,306 @@ body::before {
 .suggested-tier strong {
   color: var(--accent-primary);
   font-size: 1.3rem;
+}
+
+/* ===== EVENT CONTEXT ===== */
+.event-context {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.event-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.event-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.event-field label {
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.event-field select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ===== CRITERIA LABELS (HOVERABLE IN ADMIN MODE) ===== */
+.admin-mode .criteria-label {
+  cursor: help;
+  transition: all 0.2s ease;
+  border-bottom: 1px dashed transparent;
+  padding-bottom: 2px;
+}
+
+.admin-mode .criteria-label:hover {
+  color: var(--accent-primary);
+  border-bottom-color: var(--accent-primary);
+}
+
+/* Mobile: make clickable appearance obvious */
+@media (max-width: 1200px) {
+  .admin-mode .criteria-label {
+    cursor: pointer;
+  }
+}
+
+/* ===== COLLAPSIBLE SECTIONS ===== */
+.collapsible-section {
+  transition: all 0.3s ease;
+}
+
+.collapsible-header {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.collapsible-header:hover {
+  color: var(--accent-primary);
+}
+
+.toggle-icon {
+  transition: transform 0.3s ease;
+  font-size: 0.8rem;
+}
+
+.collapsible-section.collapsed .toggle-icon {
+  transform: rotate(-90deg);
+}
+
+.collapsible-section.collapsed .collapsible-content {
+  display: none;
+}
+
+.collapsible-content {
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+  }
+}
+
+/* ===== CRITERIA TOOLTIP ===== */
+.criteria-tooltip {
+  position: absolute;
+  left: calc(100% + 1.5rem);
+  top: 0;
+  width: 350px;
+  z-index: 5;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease 0.1s, visibility 0.2s ease 0.1s;
+}
+
+.criteria-tooltip.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+
+.criteria-tooltip-content {
+  background: var(--glass-bg);
+  backdrop-filter: blur(30px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  height: 100%;
+}
+
+.criteria-tooltip-content h4 {
+  color: var(--text-primary);
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.criteria-tooltip-content .rating-level {
+  padding: 0.75rem 1rem;
+  margin: 0.5rem 0;
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 3px solid var(--accent-primary);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* Mobile: show below on smaller screens */
+@media (max-width: 1200px) {
+  .criteria-tooltip {
+    position: fixed;
+    left: 50%;
+    top: auto;
+    bottom: 2rem;
+    transform: translateX(-50%);
+    width: calc(100% - 3rem);
+    max-width: 500px;
+    z-index: 10000;
+  }
+
+  .criteria-tooltip-content {
+    height: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .criteria-tooltip {
+    bottom: 1rem;
+    width: calc(100% - 2rem);
+  }
+
+  .criteria-tooltip-content {
+    padding: 1.25rem;
+  }
+
+  .criteria-tooltip-content h4 {
+    font-size: 0.95rem;
+  }
+
+  .criteria-tooltip-content .rating-level {
+    font-size: 0.9rem;
+    padding: 0.65rem 0.85rem;
+  }
+}
+
+/* ===== PERFORMANCE BONUSES & PENALTIES ===== */
+.performance-bonuses,
+.performance-penalties {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.performance-bonuses h3 {
+  color: #4ade80;
+}
+
+.performance-penalties h3 {
+  color: #f87171;
+}
+
+.bonus-checkboxes,
+.penalty-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.checkbox-label:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--accent-primary);
+}
+
+.checkbox-label span {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.bonus-total,
+.penalty-total {
+  padding-top: 1rem;
+  border-top: 1px solid var(--glass-border);
+  font-size: 1rem;
+}
+
+.bonus-total {
+  color: #4ade80;
+}
+
+.penalty-total {
+  color: #f87171;
+}
+
+/* ===== FINAL SCORE ===== */
+.final-score {
+  background: linear-gradient(
+    135deg,
+    rgba(138, 180, 248, 0.1),
+    rgba(138, 180, 248, 0.05)
+  );
+  border: 2px solid var(--accent-primary);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.score-breakdown {
+  display: flex;
+  justify-content: space-around;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.score-breakdown div {
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.score-breakdown span {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.total-final {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.total-final strong {
+  color: var(--accent-primary);
+}
+
+#applyTierBtn {
+  width: 100%;
+  margin-top: 0.5rem;
 }
 
 /* ===== MEDIA SECTIONS ===== */
