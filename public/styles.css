@@ -103,7 +103,6 @@ body::before {
 #saveDetailBtn,
 .upload-btn,
 #musicInputs,
-.remove-btn,
 .remove-media-btn,
 .performance-bonuses,
 .performance-penalties,
@@ -116,10 +115,52 @@ body::before {
   display: none !important;
 }
 
-/* Hide tooltip in public mode */
-body:not(.admin-mode) .criteria-tooltip {
+/* ===== PUBLIC MODE: HIDE ADMIN FEATURES ===== */
+
+/* Hide artist library (search/add) in public mode */
+body:not(.admin-mode) .artist-library {
   display: none !important;
 }
+
+/* Hide Add DJ modal in public mode */
+body:not(.admin-mode) #addDJModal {
+  display: none !important;
+}
+
+/* Hide delete mode overlay in public mode */
+body:not(.admin-mode) .delete-mode-overlay {
+  display: none !important;
+}
+
+/* Show tooltip in public mode for criteria guidance */
+body:not(.admin-mode) .criteria-tooltip {
+  display: block !important;
+}
+
+/* Hide event context inputs (admin grid) in public mode */
+body:not(.admin-mode) .event-context #eventGrid {
+  display: none !important;
+}
+
+/* Show event context display (public) in public mode */
+body:not(.admin-mode) .event-context #eventDisplay {
+  display: grid !important;
+}
+
+/* Hide event context display in admin mode */
+body.admin-mode .event-context #eventDisplay {
+  display: none !important;
+}
+
+/* Make notes read-only in public mode */
+body:not(.admin-mode) #djNotes {
+  pointer-events: none;
+  opacity: 0.7;
+  cursor: default;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* ===== ADMIN MODE: SHOW ADMIN FEATURES ===== */
 
 /* Show tooltip in admin mode */
 body.admin-mode .criteria-tooltip {
@@ -143,20 +184,41 @@ body.admin-mode .criteria-tooltip {
   display: flex !important;
 }
 
-.admin-mode .remove-btn,
 .admin-mode .remove-media-btn {
   display: block !important;
 }
 
+/* Show breakdown in both modes */
+.criteria-breakdown {
+  display: block !important;
+}
+
+/* Show bonuses, penalties, and final score ONLY in admin mode */
 .admin-mode .performance-bonuses,
 .admin-mode .performance-penalties,
 .admin-mode .final-score {
   display: block !important;
 }
 
-/* Show breakdown only in public view (NOT admin mode) */
-body:not(.admin-mode) .criteria-breakdown {
-  display: block !important;
+/* Hide bonuses, penalties sections in public mode (integrated into breakdown) */
+body:not(.admin-mode) .performance-bonuses,
+body:not(.admin-mode) .performance-penalties,
+body:not(.admin-mode) .final-score {
+  display: none !important;
+}
+
+/* Hide Apply to Tier button in public mode */
+body:not(.admin-mode) #applyTierBtn {
+  display: none !important;
+}
+
+/* Hide checkbox inputs in admin mode collapsible */
+body:not(.admin-mode) .collapsible-header {
+  cursor: default;
+}
+
+body:not(.admin-mode) .toggle-icon {
+  display: none;
 }
 
 /* Admin Mode Indicator */
@@ -429,6 +491,14 @@ body:not(.admin-mode) .criteria-breakdown {
   opacity: 0.5;
 }
 
+/* Artist grid as drop zone for moving back to library */
+.admin-mode .artist-grid.drag-over {
+  background: rgba(138, 180, 248, 0.05);
+  border: 2px dashed var(--accent-primary);
+  border-radius: 16px;
+  box-shadow: 0 0 30px var(--accent-glow);
+}
+
 /* Remove button for artists in tiers */
 .artist-card .remove-btn {
   position: absolute;
@@ -449,26 +519,31 @@ body:not(.admin-mode) .criteria-breakdown {
   filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.5));
 }
 
-/* Desktop: show on hover */
+/* ADMIN ONLY: Desktop - show on hover */
 @media (hover: hover) {
-  .tier-drop-zone .artist-card:hover .remove-btn {
+  body.admin-mode .artist-card:hover .remove-btn {
     display: block;
   }
 
-  .remove-btn:hover {
+  body.admin-mode .remove-btn:hover {
     color: #ff4545;
     transform: scale(1.3) rotate(90deg);
     filter: drop-shadow(0 0 8px rgba(255, 69, 69, 0.8));
   }
 }
 
-/* Mobile: show in delete mode */
-.tier-drop-zone.delete-mode .artist-card .remove-btn {
+/* ADMIN ONLY: Mobile - show in wiggle/delete mode */
+body.admin-mode .delete-mode .artist-card .remove-btn {
   display: block;
 }
 
-.tier-drop-zone.delete-mode .artist-card {
+body.admin-mode .delete-mode .artist-card {
   animation: wiggle 0.3s ease-in-out infinite;
+}
+
+/* PUBLIC MODE: Never show remove buttons or delete mode */
+body:not(.admin-mode) .remove-btn {
+  display: none !important;
 }
 
 @keyframes wiggle {
@@ -563,7 +638,7 @@ body:not(.admin-mode) .criteria-breakdown {
   display: flex;
   gap: 1rem;
   align-items: stretch;
-  min-height: 100px;
+  min-height: 184px;
 }
 
 .tier-label {
@@ -613,9 +688,11 @@ body:not(.admin-mode) .criteria-breakdown {
   animation: shimmer-gold 3s ease-in-out infinite;
 }
 .tier-s {
-  border: 3px solid #ffd700;
-  box-shadow: 0 0 30px rgba(255, 215, 0, 0.6),
-    inset 0 0 20px rgba(255, 215, 0, 0.3);
+  border: 4px solid #ffd700;
+  box-shadow: 0 0 50px rgba(255, 215, 0, 0.8), 0 0 80px rgba(255, 215, 0, 0.4),
+    inset 0 0 30px rgba(255, 215, 0, 0.4);
+  transform: scale(1.05);
+  font-size: 2.8rem;
 }
 
 .tier-a::before {
@@ -715,7 +792,7 @@ body:not(.admin-mode) .criteria-breakdown {
   gap: 1rem;
   flex-wrap: wrap;
   align-items: center;
-  min-height: 100px;
+  min-height: 148px;
   transition: all 0.3s ease;
 }
 
@@ -971,6 +1048,7 @@ body.modal-open {
 
 .criteria-breakdown h3 {
   margin-bottom: 1rem;
+  font-size: 1.25rem;
 }
 
 .breakdown-item {
@@ -986,25 +1064,26 @@ body.modal-open {
 }
 
 .breakdown-label {
-  min-width: 80px;
+  min-width: 100px;
   font-weight: 600;
   color: var(--text-primary);
+  font-size: 1rem;
 }
 
 .breakdown-stars {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   letter-spacing: 2px;
 }
 
 .breakdown-score {
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .breakdown-desc {
   margin-left: auto;
   color: var(--text-muted);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-style: italic;
 }
 
@@ -1204,6 +1283,44 @@ body.modal-open {
   cursor: not-allowed;
 }
 
+/* Event Display (Public Mode) */
+.event-display {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.event-display-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.event-display-label {
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.event-display-value {
+  color: var(--text-primary);
+  font-size: 1rem;
+  padding: 0.5rem 0;
+}
+
+.event-display-value:empty::after {
+  content: "Not specified";
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .event-display {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ===== CRITERIA LABELS (HOVERABLE IN ADMIN MODE) ===== */
 .admin-mode .criteria-label {
   cursor: help;
@@ -1352,6 +1469,72 @@ body.modal-open {
   .criteria-tooltip-content .rating-level {
     font-size: 0.9rem;
     padding: 0.65rem 0.85rem;
+  }
+}
+
+/* ===== CONFIRMATION POPUP ===== */
+.confirm-popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.2s ease;
+}
+
+.confirm-popup.active {
+  display: flex;
+}
+
+.confirm-content {
+  background: var(--glass-bg);
+  backdrop-filter: blur(30px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 400px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s ease;
+}
+
+.confirm-content p {
+  color: var(--text-primary);
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.confirm-actions .glass-btn {
+  min-width: 100px;
+}
+
+.confirm-actions .glass-btn.primary {
+  background: rgba(239, 68, 68, 0.8);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.confirm-actions .glass-btn.primary:hover {
+  background: rgba(220, 38, 38, 0.9);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

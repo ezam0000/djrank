@@ -172,10 +172,25 @@
                 </div>
               </div>
 
+              <!-- Criteria Breakdown (Public View) -->
+              <div class="criteria-breakdown" id="criteriaBreakdown">
+                <h3>Ranking Breakdown</h3>
+                <!-- Dynamically populated -->
+              </div>
+
               <!-- Event Context (Admin + Public View) -->
               <div class="event-context">
                 <h3>Event Context</h3>
-                <div class="event-grid">
+                <!-- Public view: display only -->
+                <div
+                  class="event-display"
+                  id="eventDisplay"
+                  style="display: none"
+                >
+                  <!-- Dynamically populated in public mode -->
+                </div>
+                <!-- Admin view: edit inputs -->
+                <div class="event-grid" id="eventGrid">
                   <div class="event-field">
                     <label for="eventCity">City</label>
                     <select class="glass-input" id="eventCity">
@@ -261,12 +276,6 @@
                     </select>
                   </div>
                 </div>
-              </div>
-
-              <!-- Criteria Breakdown (Public View) -->
-              <div class="criteria-breakdown" id="criteriaBreakdown">
-                <h3>📊 Ranking Breakdown</h3>
-                <!-- Dynamically populated -->
               </div>
 
               <div class="criteria-ranking">
@@ -454,6 +463,17 @@
           <div class="modal-footer">
             <button class="glass-btn" id="saveDetailBtn">Save Changes</button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirmation Popup -->
+    <div class="confirm-popup" id="confirmPopup">
+      <div class="confirm-content">
+        <p id="confirmMessage"></p>
+        <div class="confirm-actions">
+          <button class="glass-btn" id="confirmCancel">Cancel</button>
+          <button class="glass-btn primary" id="confirmOk">Remove</button>
         </div>
       </div>
     </div>

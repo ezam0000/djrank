@@ -119,9 +119,19 @@ module.exports = async (req, res) => {
           } else if (key.startsWith("bonus_") || key.startsWith("penalty_")) {
             // Boolean fields - ensure boolean type
             values.push(Boolean(updates[key]));
+          } else if (key === "event_date") {
+            // Date field - convert empty string to null
+            values.push(updates[key] || null);
+          } else if (key.startsWith("event_") || key === "set_duration") {
+            // Event context fields - convert empty strings to null
+            values.push(updates[key] || null);
           } else {
-            // All other fields (text, date, etc.)
-            values.push(updates[key]);
+            // All other fields (text fields can be empty strings)
+            values.push(
+              updates[key] === "" || updates[key] === undefined
+                ? null
+                : updates[key]
+            );
           }
           paramCount++;
         }
@@ -138,7 +148,16 @@ module.exports = async (req, res) => {
       const query = `UPDATE djs SET ${fields.join(
         ", "
       )} WHERE id = $${paramCount} RETURNING *`;
-      const result = await sql.query(query, values);
+
+      let result;
+      try {
+        result = await sql.query(query, values);
+      } catch (queryError) {
+        console.error("Query execution error:", queryError);
+        console.error("Query:", query);
+        console.error("Values:", values);
+        throw queryError;
+      }
 
       if (result.rows.length === 0) {
         return res.status(404).json({ error: "DJ not found" });

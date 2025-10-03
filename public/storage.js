@@ -39,7 +39,13 @@ const DB = {
         body: JSON.stringify(newDJ),
       });
 
-      if (!response.ok) throw new Error("Failed to add DJ");
+      if (!response.ok) {
+        // Don't log error for expected auth failures
+        if (response.status === 401 || response.status === 403) {
+          return null;
+        }
+        throw new Error("Failed to add DJ");
+      }
       return await response.json();
     } catch (error) {
       console.error("Error adding DJ:", error);
@@ -56,7 +62,13 @@ const DB = {
         body: JSON.stringify(updates),
       });
 
-      if (!response.ok) throw new Error("Failed to update DJ");
+      if (!response.ok) {
+        // Don't log error for expected auth failures
+        if (response.status === 401 || response.status === 403) {
+          return null;
+        }
+        throw new Error("Failed to update DJ");
+      }
       return await response.json();
     } catch (error) {
       console.error("Error updating DJ:", error);
@@ -72,7 +84,13 @@ const DB = {
         headers: this.getHeaders(),
       });
 
-      if (!response.ok) throw new Error("Failed to delete DJ");
+      if (!response.ok) {
+        // Don't log error for expected auth failures
+        if (response.status === 401 || response.status === 403) {
+          return false;
+        }
+        throw new Error("Failed to delete DJ");
+      }
       return true;
     } catch (error) {
       console.error("Error deleting DJ:", error);

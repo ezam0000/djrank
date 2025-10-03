@@ -37,5 +37,4 @@ app.get("/", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`🎧 DJ Rank server running at http://localhost:${PORT}`);
-  console.log(`📱 Clear data: http://localhost:${PORT}/clear-data.html`);
 });

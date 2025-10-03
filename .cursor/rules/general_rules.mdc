@@ -28,6 +28,7 @@ alwaysApply: true
 ## Terminal & Deployment
 
 - **NEVER run terminal commands without explicit permission**
+- **NEVER commit to git unless explicitly requested**
 - **NEVER auto-deploy to production** - only after:
   1. Testing locally successfully
   2. Code is committed to git
@@ -77,6 +78,26 @@ alwaysApply: true
 - APIs: Spotify (required), SoundCloud (optional)
 - Deployment: Vercel with auto-deploy from git
 - Design: Dark mode, glassmorphism, mobile-first
-- No file uploads - images from Spotify API
+- Media: Base64-encoded images/videos (manual compression: WebP for images, H.264 MP4 for videos)
 - Database: Neon Postgres (serverless) integrated with Vercel
 - Environment: `.env.local` for local dev, Vercel env vars for production
+- Admin: Secure token-based auth (64-char secret, rate limiting, constant-time comparison)
+
+## Database & API Rules
+
+- **Always convert empty strings to `null` for database fields (especially dates)**
+- **Never send empty strings for DATE fields** - Postgres requires valid date or null
+- **Optimize API calls**: Update local data directly instead of reloading from DB when possible
+- **Handle array fields properly**: `TEXT[]` arrays for photos/videos
+- **Boolean fields**: Ensure proper type conversion for bonus/penalty checkboxes
+- **Add null checks**: Always check if element exists before accessing properties (e.g., `element?.classList`)
+
+## Admin Mode Features
+
+- **Drag & Drop**: Admin can override any tier assignment regardless of score
+- **Drag back to library**: Move DJs from tiers back to unranked library
+- **Delete differentiation**:
+  - Library: Permanent deletion with confirmation
+  - Tiers: Remove from tier (move back to library)
+- **No duplicates**: Filter duplicate DJs by ID in library display
+- **Show remove buttons**: Only visible in admin mode (hover on desktop, touch for mobile)

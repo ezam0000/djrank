@@ -8,6 +8,7 @@ class DJRankApp {
     this.longPressTimer = null;
     this.isAdmin = false;
     this.uploadsInProgress = 0;
+    this.confirmCallback = null;
     this.init();
   }
 
@@ -25,6 +26,7 @@ class DJRankApp {
 
     // Setup event listeners
     this.setupEventListeners();
+    this.setupConfirmPopup();
 
     // Render initial UI
     this.renderArtistGrid();
@@ -481,7 +483,17 @@ class DJRankApp {
     grid.innerHTML = "";
 
     // Use provided DJs or default to unranked DJs
-    const displayDJs = djs || this.djs.filter((dj) => !dj.tier);
+    let displayDJs = djs || this.djs.filter((dj) => !dj.tier);
+
+    // Remove duplicates (keep first occurrence by ID)
+    const seenIds = new Set();
+    displayDJs = displayDJs.filter((dj) => {
+      if (seenIds.has(dj.id)) {
+        return false;
+      }
+      seenIds.add(dj.id);
+      return true;
+    });
 
     if (displayDJs.length === 0) {
       grid.innerHTML = `
@@ -494,12 +506,13 @@ class DJRankApp {
     }
 
     displayDJs.forEach((dj) => {
-      const card = this.createArtistCard(dj);
+      // Show remove button in library if admin mode
+      const card = this.createArtistCard(dj, this.isAdmin, "library");
       grid.appendChild(card);
     });
   }
 
-  createArtistCard(dj, showRemoveBtn = false) {
+  createArtistCard(dj, showRemoveBtn = false, location = "tier") {
     const card = document.createElement("div");
     card.className = "artist-card";
     card.innerHTML = `
@@ -514,12 +527,24 @@ class DJRankApp {
       ${showRemoveBtn ? '<button class="remove-btn">×</button>' : ""}
     `;
 
-    // Add remove button handler if in tier
+    // Add remove button handler
     if (showRemoveBtn) {
       const removeBtn = card.querySelector(".remove-btn");
       removeBtn.addEventListener("click", async (e) => {
         e.stopPropagation();
-        await this.removeFromTier(dj.id);
+
+        if (location === "library") {
+          // Delete from library (permanent delete)
+          this.showConfirm(
+            `Are you sure you want to delete ${dj.name} permanently? This cannot be undone.`,
+            () => this.deleteFromLibrary(dj.id)
+          );
+        } else {
+          // Remove from tier (show confirmation)
+          this.showConfirm(`Remove ${dj.name} from tier ranking?`, () =>
+            this.removeFromTier(dj.id)
+          );
+        }
       });
 
       // Long press for mobile delete mode
@@ -575,11 +600,74 @@ class DJRankApp {
   }
 
   async removeFromTier(djId) {
-    await DB.updateDJ(djId, { tier: null });
-    await this.loadDJs();
-    this.renderArtistGrid();
-    this.loadTierRankings();
-    console.log("✅ Removed DJ from tier");
+    const result = await DB.updateDJ(djId, { tier: null });
+
+    if (result) {
+      // Update local data with result from database
+      const djIndex = this.djs.findIndex((d) => d.id === djId);
+      if (djIndex !== -1) {
+        this.djs[djIndex] = result;
+      }
+
+      this.renderArtistGrid();
+      this.loadTierRankings();
+      console.log("✅ Removed DJ from tier");
+    }
+  }
+
+  async deleteFromLibrary(djId) {
+    const success = await DB.deleteDJ(djId);
+
+    if (success) {
+      // Remove from local array
+      this.djs = this.djs.filter((d) => d.id !== djId);
+
+      this.renderArtistGrid();
+      this.loadTierRankings();
+      console.log("✅ DJ deleted from library");
+    }
+  }
+
+  showConfirm(message, onConfirm) {
+    const popup = document.getElementById("confirmPopup");
+    const messageEl = document.getElementById("confirmMessage");
+
+    messageEl.textContent = message;
+    popup.classList.add("active");
+    document.body.classList.add("modal-open");
+
+    this.confirmCallback = onConfirm;
+  }
+
+  hideConfirm() {
+    const popup = document.getElementById("confirmPopup");
+    popup.classList.remove("active");
+    document.body.classList.remove("modal-open");
+    this.confirmCallback = null;
+  }
+
+  setupConfirmPopup() {
+    const cancelBtn = document.getElementById("confirmCancel");
+    const okBtn = document.getElementById("confirmOk");
+    const popup = document.getElementById("confirmPopup");
+
+    cancelBtn.addEventListener("click", () => {
+      this.hideConfirm();
+    });
+
+    okBtn.addEventListener("click", async () => {
+      if (this.confirmCallback) {
+        await this.confirmCallback();
+      }
+      this.hideConfirm();
+    });
+
+    // Close on backdrop click
+    popup.addEventListener("click", (e) => {
+      if (e.target === popup) {
+        this.hideConfirm();
+      }
+    });
   }
 
   loadTierRankings() {
@@ -596,7 +684,8 @@ class DJRankApp {
         `.tier-drop-zone[data-tier="${dj.tier}"]`
       );
       if (zone) {
-        const card = this.createArtistCard(dj, true); // true = show remove button
+        // Show remove button in tiers if admin mode, location = 'tier'
+        const card = this.createArtistCard(dj, this.isAdmin, "tier");
         zone.appendChild(card);
       }
     });
@@ -790,8 +879,15 @@ class DJRankApp {
     };
 
     try {
-      await DB.addDJ(djData);
-      await this.loadDJs();
+      const result = await DB.addDJ(djData);
+
+      // Silently fail if not authorized (public mode)
+      if (!result) {
+        return;
+      }
+
+      // Add to local array immediately (no need to reload everything)
+      this.djs.push(result);
       this.renderArtistGrid();
       this.closeModal("addDJModal");
 
@@ -821,8 +917,13 @@ class DJRankApp {
     };
 
     try {
-      await DB.addDJ(djData);
-      await this.loadDJs();
+      const result = await DB.addDJ(djData);
+
+      // Add to local array immediately (no need to reload everything)
+      if (result) {
+        this.djs.push(result);
+      }
+
       this.renderArtistGrid();
       this.closeModal("addDJModal");
 
@@ -844,6 +945,14 @@ class DJRankApp {
       visuals: 0,
       creativity: 0,
     };
+
+    // Handle legacy "guests" field - migrate to "creativity" on the fly
+    if (criteria.guests !== undefined && criteria.creativity === undefined) {
+      criteria.creativity = criteria.guests;
+    }
+
+    // Ensure creativity exists (fallback to 0)
+    criteria.creativity = criteria.creativity || 0;
 
     // Calculate scores (new academic system)
     const coreScore =
@@ -955,86 +1064,101 @@ class DJRankApp {
           criteria.creativity
         )}</span>
       </div>
-      <div style="padding: 0.5rem 0; border-top: 1px solid var(--glass-border); margin-top: 0.5rem;">
-        <strong style="color: var(--text-primary);">Core Total: ${coreScore}/12</strong>
+      
+      <div style="padding: 0.75rem 0; margin-top: 0.5rem; border-top: 1px solid var(--glass-border);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <strong style="color: var(--text-primary); font-size: 1rem;">Core Total:</strong>
+          <strong style="color: var(--text-primary); font-size: 1rem;">${coreScore}/12</strong>
+        </div>
       </div>
       
       ${
         bonusScore > 0 || penaltyScore < 0
           ? `
-        <div style="margin-top: 1rem;">
-          <strong style="color: var(--text-primary);">Performance Modifiers:</strong>
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--glass-border);">
+          <strong style="color: var(--text-primary); font-size: 1rem; display: block; margin-bottom: 0.75rem;">Performance Modifiers:</strong>
         </div>
       `
           : ""
       }
       
       ${
-        bonusScore > 0
+        dj.bonus_crowd_control
           ? `
-        <div style="margin-top: 0.75rem;">
-          <div style="color: #4ade80; font-size: 0.9rem; margin-bottom: 0.5rem;">⭐ Bonuses:</div>
-          ${
-            dj.bonus_crowd_control
-              ? '<div style="padding-left: 1rem; color: var(--text-secondary); font-size: 0.85rem;">✓ Exceptional Crowd Control (+0.5)</div>'
-              : ""
-          }
-          ${
-            dj.bonus_signature_moment
-              ? '<div style="padding-left: 1rem; color: var(--text-secondary); font-size: 0.85rem;">✓ Signature Moment (+0.5)</div>'
-              : ""
-          }
-          ${
-            dj.bonus_bold_risks
-              ? '<div style="padding-left: 1rem; color: var(--text-secondary); font-size: 0.85rem;">✓ Bold Risk-Taking (+0.5)</div>'
-              : ""
-          }
-          <div style="padding: 0.5rem 0; padding-left: 1rem;">
-            <strong style="color: #4ade80;">Bonus Total: +${bonusScore.toFixed(
-              1
-            )}</strong>
-          </div>
+        <div class="breakdown-item">
+          <span class="breakdown-label" style="color: #4ade80;">Crowd Control:</span>
+          <span class="breakdown-score" style="color: #4ade80;">+0.5</span>
+          <span class="breakdown-desc" style="color: #4ade80;">Bonus</span>
+        </div>
+      `
+          : ""
+      }
+      ${
+        dj.bonus_signature_moment
+          ? `
+        <div class="breakdown-item">
+          <span class="breakdown-label" style="color: #4ade80;">Signature Moment:</span>
+          <span class="breakdown-score" style="color: #4ade80;">+0.5</span>
+          <span class="breakdown-desc" style="color: #4ade80;">Bonus</span>
+        </div>
+      `
+          : ""
+      }
+      ${
+        dj.bonus_bold_risks
+          ? `
+        <div class="breakdown-item">
+          <span class="breakdown-label" style="color: #4ade80;">Bold Risks:</span>
+          <span class="breakdown-score" style="color: #4ade80;">+0.5</span>
+          <span class="breakdown-desc" style="color: #4ade80;">Bonus</span>
         </div>
       `
           : ""
       }
       
       ${
-        penaltyScore < 0
+        dj.penalty_cliche_tracks
           ? `
-        <div style="margin-top: 0.75rem;">
-          <div style="color: #f87171; font-size: 0.9rem; margin-bottom: 0.5rem;">⚠️ Penalties:</div>
-          ${
-            dj.penalty_cliche_tracks
-              ? '<div style="padding-left: 1rem; color: var(--text-secondary); font-size: 0.85rem;">✓ Cliché Tracks (-0.5)</div>'
-              : ""
-          }
-          ${
-            dj.penalty_overreliance
-              ? '<div style="padding-left: 1rem; color: var(--text-secondary); font-size: 0.85rem;">✓ Over-Reliance on Hits (-0.5)</div>'
-              : ""
-          }
-          ${
-            dj.penalty_poor_energy
-              ? '<div style="padding-left: 1rem; color: var(--text-secondary); font-size: 0.85rem;">✓ Poor Energy Management (-0.5)</div>'
-              : ""
-          }
-          <div style="padding: 0.5rem 0; padding-left: 1rem;">
-            <strong style="color: #f87171;">Penalty Total: ${penaltyScore.toFixed(
-              1
-            )}</strong>
-          </div>
+        <div class="breakdown-item">
+          <span class="breakdown-label" style="color: #f87171;">Cliché Tracks:</span>
+          <span class="breakdown-score" style="color: #f87171;">-0.5</span>
+          <span class="breakdown-desc" style="color: #f87171;">Penalty</span>
+        </div>
+      `
+          : ""
+      }
+      ${
+        dj.penalty_overreliance
+          ? `
+        <div class="breakdown-item">
+          <span class="breakdown-label" style="color: #f87171;">Overreliance:</span>
+          <span class="breakdown-score" style="color: #f87171;">-0.5</span>
+          <span class="breakdown-desc" style="color: #f87171;">Penalty</span>
+        </div>
+      `
+          : ""
+      }
+      ${
+        dj.penalty_poor_energy
+          ? `
+        <div class="breakdown-item">
+          <span class="breakdown-label" style="color: #f87171;">Poor Energy:</span>
+          <span class="breakdown-score" style="color: #f87171;">-0.5</span>
+          <span class="breakdown-desc" style="color: #f87171;">Penalty</span>
         </div>
       `
           : ""
       }
       
-      <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid var(--accent-primary);">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <strong style="font-size: 1.1rem; color: var(--accent-primary);">FINAL SCORE: ${totalScore.toFixed(
+      <div style="margin-top: 1.5rem; padding: 1rem; border-top: 2px solid var(--accent-primary); background: rgba(59, 130, 246, 0.1); border-radius: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <strong style="font-size: 1.15rem; color: var(--accent-primary);">FINAL SCORE:</strong>
+          <strong style="font-size: 1.15rem; color: var(--accent-primary);">${totalScore.toFixed(
             1
           )}/15</strong>
-          <span style="color: var(--text-secondary);">→ Tier <strong style="color: var(--accent-primary); font-size: 1.2rem;">${suggestedTier}</strong></span>
+        </div>
+        <div style="display: flex; justify-content: flex-end; align-items: center;">
+          <span style="color: var(--text-secondary); font-size: 0.95rem;">Tier: <strong style="color: var(--accent-primary); font-size: 1.3rem; margin-left: 0.5rem;">${suggestedTier}</strong></span>
         </div>
       </div>
     `;
@@ -1123,6 +1247,13 @@ class DJRankApp {
       visuals: 0,
       creativity: 0,
     };
+
+    // Handle legacy "guests" field
+    if (criteria.guests !== undefined && criteria.creativity === undefined) {
+      criteria.creativity = criteria.guests;
+    }
+    criteria.creativity = criteria.creativity || 0;
+
     this.setCriteriaRating("flow", criteria.flow);
     this.setCriteriaRating("vibes", criteria.vibes);
     this.setCriteriaRating("visuals", criteria.visuals);
@@ -1153,6 +1284,9 @@ class DJRankApp {
 
     // Update venue dropdown based on selected city (this also handles disabling if no city)
     this.populateVenueDropdown(dj.event_city || "");
+
+    // Populate event display for public mode
+    this.populateEventDisplay(dj);
 
     this.updateTotalScore();
 
@@ -1304,6 +1438,60 @@ class DJRankApp {
     }
   }
 
+  populateEventDisplay(dj) {
+    const eventDisplay = document.getElementById("eventDisplay");
+    if (!eventDisplay) return;
+
+    const formatDate = (dateStr) => {
+      if (!dateStr) return "";
+      return new Date(dateStr).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    };
+
+    const hasAnyData =
+      dj.event_city ||
+      dj.event_venue ||
+      dj.event_date ||
+      dj.event_type ||
+      dj.event_slot ||
+      dj.set_duration;
+
+    if (!hasAnyData) {
+      eventDisplay.style.display = "none";
+      return;
+    }
+
+    eventDisplay.innerHTML = `
+      <div class="event-display-item">
+        <div class="event-display-label">City</div>
+        <div class="event-display-value">${dj.event_city || ""}</div>
+      </div>
+      <div class="event-display-item">
+        <div class="event-display-label">Venue</div>
+        <div class="event-display-value">${dj.event_venue || ""}</div>
+      </div>
+      <div class="event-display-item">
+        <div class="event-display-label">Date</div>
+        <div class="event-display-value">${formatDate(dj.event_date)}</div>
+      </div>
+      <div class="event-display-item">
+        <div class="event-display-label">Event Type</div>
+        <div class="event-display-value">${dj.event_type || ""}</div>
+      </div>
+      <div class="event-display-item">
+        <div class="event-display-label">Set Slot</div>
+        <div class="event-display-value">${dj.event_slot || ""}</div>
+      </div>
+      <div class="event-display-item">
+        <div class="event-display-label">Set Duration</div>
+        <div class="event-display-value">${dj.set_duration || ""}</div>
+      </div>
+    `;
+  }
+
   async applyCalculatedTier() {
     if (!this.currentDJ) return;
 
@@ -1341,23 +1529,36 @@ class DJRankApp {
       penalty_overreliance: document.getElementById("penaltyOverreliance")
         .checked,
       penalty_poor_energy: document.getElementById("penaltyPoorEnergy").checked,
-      // Event context
-      event_city: document.getElementById("eventCity").value,
-      event_venue: document.getElementById("eventVenue").value,
-      event_date: document.getElementById("eventDate").value,
-      event_type: document.getElementById("eventType").value,
-      event_slot: document.getElementById("eventSlot").value,
-      set_duration: document.getElementById("setDuration").value,
+      // Event context (convert empty strings to null)
+      event_city: document.getElementById("eventCity").value || null,
+      event_venue: document.getElementById("eventVenue").value || null,
+      event_date: document.getElementById("eventDate").value || null,
+      event_type: document.getElementById("eventType").value || null,
+      event_slot: document.getElementById("eventSlot").value || null,
+      set_duration: document.getElementById("setDuration").value || null,
       // Media
       photos: this.currentDJ.photos || [],
       videos: this.currentDJ.videos || [],
     };
 
     try {
-      await DB.updateDJ(this.currentDJ.id, updates);
-      await this.loadDJs();
+      const result = await DB.updateDJ(this.currentDJ.id, updates);
+
+      if (!result) {
+        throw new Error("Failed to update DJ");
+      }
+
+      // Update current DJ in local array without full reload
+      const index = this.djs.findIndex((dj) => dj.id === this.currentDJ.id);
+      if (index !== -1) {
+        this.djs[index] = result;
+      }
+
       console.log("✅ DJ details saved");
       this.closeModal("djDetailModal");
+
+      // Re-render tier rankings with updated data (no API call)
+      this.loadTierRankings();
     } catch (error) {
       console.error("Error saving DJ details:", error);
       alert("Error saving details. Please try again.");
