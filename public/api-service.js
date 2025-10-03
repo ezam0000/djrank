@@ -100,9 +100,40 @@ const APIService = {
       this.searchSpotify(query),
     ]);
 
-    // Combine and sort by followers
+    // Combine results
     const combined = [...soundcloudResults, ...spotifyResults];
-    return combined.sort((a, b) => (b.followers || 0) - (a.followers || 0));
+
+    // Filter and rank by relevance - STRICT matching only
+    const queryLower = query.toLowerCase().trim();
+
+    const scoredResults = combined
+      .filter((artist) => {
+        // Only include if name contains the search query
+        const nameLower = artist.name.toLowerCase();
+        return nameLower.includes(queryLower);
+      })
+      .map((artist) => {
+        const nameLower = artist.name.toLowerCase();
+        let score = 0;
+
+        // Exact match (highest priority)
+        if (nameLower === queryLower) {
+          score = 1000000 + (artist.followers || 0);
+        }
+        // Starts with query (high priority)
+        else if (nameLower.startsWith(queryLower)) {
+          score = 100000 + (artist.followers || 0);
+        }
+        // Contains query (medium priority)
+        else if (nameLower.includes(queryLower)) {
+          score = 10000 + (artist.followers || 0);
+        }
+
+        return { ...artist, score };
+      });
+
+    // Sort by score and limit results
+    return scoredResults.sort((a, b) => b.score - a.score).slice(0, 10);
   },
 
   // Get sample/demo DJs (fallback)
